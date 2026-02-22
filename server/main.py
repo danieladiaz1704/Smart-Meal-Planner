@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from ai_engine import (
-    init_recipes,
+    init_datasets,
     generate_meal_plan,
     get_recipe_status,
     search_recipes,
@@ -18,14 +18,13 @@ from schemas import MealPlanRequest, ReplaceMealRequest
 
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
-RAW_RECIPES_PATH = os.path.join(DATA_DIR, "RAW_recipes.csv")
 
 ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 app = FastAPI(
     title="Smart Meal Planner API",
-    version="1.2.0",
-    description="FastAPI backend + Food.com RAW_recipes.csv (goal-aware, healthier, replace-meal, explainability, shopping list).",
+    version="2.0.0",
+    description="FastAPI backend + custom ingredient-based meal database (ingredients_db.csv + meals_recipes.csv).",
 )
 
 app.add_middleware(
@@ -40,10 +39,10 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     try:
-        init_recipes(RAW_RECIPES_PATH)
+        init_datasets(DATA_DIR)
     except Exception as e:
         raise RuntimeError(
-            f"Failed to initialize recipe engine. Expected RAW_recipes.csv at: {RAW_RECIPES_PATH}. "
+            f"Failed to initialize datasets. Expected ingredients_db.csv and meals_recipes.csv inside: {DATA_DIR}. "
             f"Error: {str(e)}"
         )
 
@@ -52,17 +51,17 @@ def startup():
 def status() -> Dict[str, Any]:
     return {
         "status": "ok",
-        "api": {"version": "1.2.0"},
+        "api": {"version": "2.0.0"},
         "data_dir": DATA_DIR,
-        "recipes_dataset": {"path": RAW_RECIPES_PATH, **get_recipe_status()},
+        "datasets": get_recipe_status(),
     }
 
 
 @app.post("/reload-dataset")
 def reload_dataset() -> Dict[str, Any]:
     try:
-        init_recipes(RAW_RECIPES_PATH)
-        return {"status": "ok", "recipes_dataset": {"path": RAW_RECIPES_PATH, **get_recipe_status()}}
+        init_datasets(DATA_DIR)
+        return {"status": "ok", "datasets": get_recipe_status()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Reload failed: {str(e)}")
 

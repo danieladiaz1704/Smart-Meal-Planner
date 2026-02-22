@@ -1,5 +1,4 @@
 meal_id,meal_name,meal_type,diet_type,prep_time_min,ingredients
-meal_id,meal_name,meal_type,diet_type,prep_time_min,ingredients
 1001,Greek Yogurt Bowl (berries + chia),breakfast,vegetarian,8,"[{""id"":1,""g"":250},{""id"":46,""g"":80},{""id"":18,""g"":12}]"
 1002,Skyr Bowl (berries + flax),breakfast,vegetarian,6,"[{""id"":2,""g"":250},{""id"":45,""g"":90},{""id"":19,""g"":10}]"
 1003,Cottage Cheese + Pineapple + walnuts,breakfast,vegetarian,5,"[{""id"":3,""g"":220},{""id"":48,""g"":120},{""id"":24,""g"":15}]"

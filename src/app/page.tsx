@@ -113,6 +113,13 @@ export default function Landing() {
               >
                 View last plan
               </button>
+              <button
+                onClick={() => router.push("/calorie-calculator")}
+               className="rounded-2xl px-8 py-4 border border-slate-200 bg-white font-bold hover:border-rose-200 transition"
+              >
+                Calorie Calculator
+              </button>
+              
             </div>
 
             <div className="flex flex-wrap gap-2 pt-2">
