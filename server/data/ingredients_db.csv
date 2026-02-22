@@ -1,0 +1,131 @@
+ingredient_id,ingredient_name,kcal_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g,diet_type,category  
+1,Greek yogurt 0%,59,10.3,3.6,0.4,vegetarian,dairy
+2,Skyr 0%,62,11.0,4.0,0.2,vegetarian,dairy
+3,Cottage cheese 1%,82,11.0,3.4,1.0,vegetarian,dairy
+4,Milk 2%,50,3.4,5.0,2.0,vegetarian,dairy
+5,Almond milk unsweetened,15,0.6,0.3,1.2,vegan,dairy-alt
+6,Soy milk unsweetened,33,3.3,1.7,1.8,vegan,dairy-alt
+7,Oats (dry),389,16.9,66.3,6.9,vegan,grains
+8,Whole wheat bread,247,13.0,41.0,4.2,vegan,grains
+9,White rice cooked,130,2.4,28.0,0.3,vegan,grains
+10,Brown rice cooked,111,2.6,23.0,0.9,vegan,grains
+11,Quinoa cooked,120,4.4,21.3,1.9,vegan,grains
+12,Couscous cooked,112,3.8,23.0,0.2,vegan,grains
+13,Pasta cooked,157,5.8,30.9,0.9,vegan,grains
+14,Whole wheat pasta cooked,149,6.0,30.0,1.0,vegan,grains
+15,Tortilla (whole wheat),310,9.0,53.0,8.0,vegan,grains
+16,Rice cakes,387,7.0,82.0,3.0,vegan,grains
+17,Granola,471,10.0,64.0,20.0,vegan,grains
+18,Chia seeds,486,16.5,42.1,30.7,vegan,seeds
+19,Flax seeds,534,18.3,28.9,42.2,vegan,seeds
+20,Hemp seeds,553,31.6,8.7,48.8,vegan,seeds
+21,Peanut butter,588,25.0,20.0,50.0,vegan,nuts
+22,Almond butter,614,21.0,19.0,56.0,vegan,nuts
+23,Almonds,579,21.0,22.0,50.0,vegan,nuts
+24,Walnuts,654,15.0,14.0,65.0,vegan,nuts
+25,Cashews,553,18.0,30.0,44.0,vegan,nuts
+26,Pumpkin seeds,559,30.0,11.0,49.0,vegan,seeds
+27,Sunflower seeds,584,21.0,20.0,51.0,vegan,seeds
+28,Olive oil,884,0.0,0.0,100.0,vegan,fats
+29,Canola oil,884,0.0,0.0,100.0,vegan,fats
+30,Coconut oil,892,0.0,0.0,100.0,vegan,fats
+31,Butter,717,0.9,0.1,81.0,vegetarian,fats
+32,Avocado,160,2.0,8.5,14.7,vegan,fats
+33,Mayonnaise,680,1.0,1.0,75.0,vegetarian,condiments
+34,Mustard,66,4.4,5.8,3.3,vegan,condiments
+35,Ketchup,112,1.3,26.0,0.2,vegan,condiments
+36,Soy sauce,53,8.1,4.9,0.6,vegan,condiments
+37,Salsa,36,1.5,7.0,0.2,vegan,condiments
+38,Hummus,166,8.0,14.0,9.6,vegan,condiments
+39,Maple syrup,260,0.0,67.0,0.0,vegan,sweeteners
+40,Honey,304,0.3,82.0,0.0,vegetarian,sweeteners
+41,Sugar,387,0.0,100.0,0.0,vegan,sweeteners
+
+42,Banana,89,1.1,22.8,0.3,vegan,fruit
+43,Apple,52,0.3,13.8,0.2,vegan,fruit
+44,Orange,47,0.9,11.8,0.1,vegan,fruit
+45,Strawberries,32,0.7,7.7,0.3,vegan,fruit
+46,Blueberries,57,0.7,14.5,0.3,vegan,fruit
+47,Grapes,69,0.7,18.1,0.2,vegan,fruit
+48,Pineapple,50,0.5,13.1,0.1,vegan,fruit
+49,Mango,60,0.8,15.0,0.4,vegan,fruit
+50,Peach,39,0.9,9.5,0.3,vegan,fruit
+51,Watermelon,30,0.6,7.6,0.2,vegan,fruit
+52,Lemon juice,22,0.4,6.9,0.2,vegan,fruit
+53,Tomato,18,0.9,3.9,0.2,vegan,vegetables
+54,Cucumber,15,0.7,3.6,0.1,vegan,vegetables
+55,Carrots,41,0.9,10.0,0.2,vegan,vegetables
+56,Spinach,23,2.9,3.6,0.4,vegan,vegetables
+57,Broccoli,34,2.8,7.0,0.4,vegan,vegetables
+58,Bell pepper,31,1.0,6.0,0.3,vegan,vegetables
+59,Onion,40,1.1,9.3,0.1,vegan,vegetables
+60,Garlic,149,6.4,33.0,0.5,vegan,vegetables
+61,Lettuce,15,1.4,2.9,0.2,vegan,vegetables
+62,Kale,49,4.3,8.8,0.9,vegan,vegetables
+63,Zucchini,17,1.2,3.1,0.3,vegan,vegetables
+64,Mushrooms,22,3.1,3.3,0.3,vegan,vegetables
+65,Cauliflower,25,1.9,5.0,0.3,vegan,vegetables
+66,Green beans,31,1.8,7.0,0.1,vegan,vegetables
+67,Corn,96,3.4,21.0,1.5,vegan,vegetables
+68,Peas,81,5.4,14.0,0.4,vegan,vegetables
+69,Sweet potato baked,90,2.0,21.0,0.2,vegan,vegetables
+70,Potato baked,93,2.5,21.0,0.1,vegan,vegetables
+
+71,Lentils cooked,116,9.0,20.0,0.4,vegan,legumes
+72,Chickpeas cooked,164,9.0,27.0,2.6,vegan,legumes
+73,Black beans cooked,132,9.0,24.0,0.5,vegan,legumes
+74,Kidney beans cooked,127,8.7,22.8,0.5,vegan,legumes
+75,Pinto beans cooked,143,9.0,26.0,0.7,vegan,legumes
+76,Edamame cooked,122,11.9,9.9,5.2,vegan,legumes
+77,Tofu firm,144,17.0,3.0,8.7,vegan,protein
+78,Tofu silken,55,5.0,1.5,3.0,vegan,protein
+79,Tempeh,193,20.0,9.0,11.0,vegan,protein
+80,Seitan,370,75.0,14.0,2.0,vegan,protein
+81,Textured vegetable protein (TVP dry),327,50.0,33.0,1.0,vegan,protein
+
+82,Egg whole,143,13.0,1.1,10.0,non-vegetarian,protein
+83,Egg whites,52,11.0,0.7,0.2,non-vegetarian,protein
+84,Chicken breast cooked,165,31.0,0.0,3.6,non-vegetarian,protein
+85,Turkey breast cooked,135,29.0,0.0,1.6,non-vegetarian,protein
+86,Lean ground turkey cooked,180,27.0,0.0,8.0,non-vegetarian,protein
+87,Beef lean cooked,250,26.0,0.0,15.0,non-vegetarian,protein
+88,Salmon cooked,208,20.0,0.0,13.0,non-vegetarian,protein
+89,Cod cooked,105,23.0,0.0,0.9,non-vegetarian,protein
+90,Shrimp cooked,99,24.0,0.2,0.3,non-vegetarian,protein
+91,Canned tuna in water,116,26.0,0.0,1.0,non-vegetarian,protein
+
+92,Cheddar cheese,403,25.0,1.3,33.0,vegetarian,dairy
+93,Parmesan,431,38.0,4.0,29.0,vegetarian,dairy
+94,Mozzarella part-skim,254,24.0,3.0,16.0,vegetarian,dairy
+95,Feta,264,14.0,4.0,21.0,vegetarian,dairy
+96,Paneer,321,18.0,4.0,25.0,vegetarian,dairy
+97,Cream cheese,342,6.0,4.0,34.0,vegetarian,dairy
+
+98,Whey protein powder,400,80.0,10.0,6.0,vegetarian,supplements
+99,Pea protein powder,380,75.0,10.0,6.0,vegan,supplements
+
+100,Dark chocolate 70%,600,7.0,46.0,43.0,vegan,treats
+101,Cocoa powder unsweetened,228,19.0,58.0,14.0,vegan,treats
+
+102,Chicken sausage,250,14.0,2.0,20.0,non-vegetarian,protein
+103,Turkey bacon,217,29.0,0.0,11.0,non-vegetarian,protein
+104,Beef jerky,410,33.0,11.0,26.0,non-vegetarian,snacks
+105,Turkey jerky,310,50.0,8.0,4.0,non-vegetarian,snacks
+
+106,Granola bar,440,8.0,72.0,14.0,vegan,snacks
+107,Protein bar,370,30.0,35.0,10.0,vegetarian,snacks
+
+108,Strawberry jam,250,0.3,65.0,0.1,vegan,condiments
+109,Peanut sauce,520,12.0,18.0,40.0,vegan,condiments
+110,Tahini,595,17.0,21.0,53.0,vegan,condiments
+111,Pesto (traditional),430,5.0,7.0,45.0,vegetarian,condiments
+
+112,Basil,23,3.2,2.7,0.6,vegan,spices
+113,Cilantro,23,2.1,3.7,0.5,vegan,spices
+114,Black pepper,251,10.0,64.0,3.3,vegan,spices
+115,Salt,0,0.0,0.0,0.0,vegan,spices
+116,Cinnamon,247,4.0,81.0,1.2,vegan,spices
+117,Cumin,375,18.0,44.0,22.0,vegan,spices
+118,Paprika,282,14.0,54.0,13.0,vegan,spices
+119,Chili powder,282,12.0,50.0,14.0,vegan,spices
+120,Ginger,80,1.8,18.0,0.8,vegan,spices
