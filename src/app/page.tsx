@@ -67,6 +67,13 @@ export default function Landing() {
             </button>
 
             <button
+  onClick={() => router.push("/login")}
+  className="rounded-2xl px-4 py-2 border border-slate-200 bg-white font-semibold hover:border-rose-200 transition"
+>
+  Login
+</button>
+
+            <button
               onClick={() => router.push("/planner")}
               className="rounded-2xl px-4 py-2 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
             >
