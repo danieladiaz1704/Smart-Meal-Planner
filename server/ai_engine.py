@@ -1,4 +1,6 @@
 import json
+import os
+import joblib
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Any, Optional, Literal, Tuple
@@ -10,8 +12,15 @@ GoalType = Literal["lose_weight", "maintain", "gain_muscle"]
 # cache in-memory
 _ING_DF: Optional[pd.DataFrame] = None
 _MEALS_DF: Optional[pd.DataFrame] = None
-_META: Dict[str, Any] = {"loaded": False, "rows_loaded": {"ingredients": 0, "meals": 0}, "data_dir": None, "error": None}
+_PREF_MODEL = None
+_PREF_LABEL_ENCODER = None
 
+_META: Dict[str, Any] = {
+    "loaded": False,
+    "rows_loaded": {"ingredients": 0, "meals": 0},
+    "data_dir": None,
+    "error": None,
+}
 
 MEAL_WEIGHTS_4 = {"breakfast": 0.25, "lunch": 0.35, "dinner": 0.35, "snack": 0.05}
 MEAL_WEIGHTS_3 = {"breakfast": 0.30, "lunch": 0.35, "dinner": 0.35}
@@ -62,8 +71,9 @@ def _compute_meal_macros(items: List[Dict[str, Any]], ing_df: pd.DataFrame) -> D
     total_p = 0.0
     total_c = 0.0
     total_f = 0.0
+    total_fiber = 0.0
+    total_sugar = 0.0
 
-    # map for speed
     idx = ing_df.set_index("ingredient_id")
 
     for it in items:
@@ -71,30 +81,41 @@ def _compute_meal_macros(items: List[Dict[str, Any]], ing_df: pd.DataFrame) -> D
         grams = float(it["g"])
         if ing_id not in idx.index:
             continue
+
         row = idx.loc[ing_id]
         factor = grams / 100.0
+
         total_kcal += float(row["kcal_per_100g"]) * factor
         total_p += float(row["protein_per_100g"]) * factor
         total_c += float(row["carbs_per_100g"]) * factor
         total_f += float(row["fat_per_100g"]) * factor
+
+        if "fiber_per_100g" in row.index:
+            total_fiber += float(row["fiber_per_100g"]) * factor
+
+        if "sugar_per_100g" in row.index:
+            total_sugar += float(row["sugar_per_100g"]) * factor
 
     return {
         "calories": round(total_kcal, 1),
         "protein_g": round(total_p, 1),
         "carbs_g": round(total_c, 1),
         "fat_g": round(total_f, 1),
+        "fiber_g": round(total_fiber, 1),
+        "sugar_g": round(total_sugar, 1),
     }
 
 
 def init_datasets(data_dir: str) -> None:
-    global _ING_DF, _MEALS_DF, _META
+    global _ING_DF, _MEALS_DF, _META, _PREF_MODEL, _PREF_LABEL_ENCODER
 
     try:
         ing_path = f"{data_dir}/ingredients_db.csv"
         meals_path = f"{data_dir}/meals_recipes.csv"
 
-        ing = pd.read_csv(ing_path)
-        meals = pd.read_csv(meals_path)
+        # Both files are tab-separated in your project
+        ing = pd.read_csv(ing_path, sep="\t")
+        meals = pd.read_csv(meals_path, sep="\t")
 
         # remove duplicated header row if accidentally present
         if "meal_id" in meals.columns and meals["meal_id"].astype(str).str.lower().eq("meal_id").any():
@@ -106,6 +127,19 @@ def init_datasets(data_dir: str) -> None:
         meals["prep_time_min"] = pd.to_numeric(meals["prep_time_min"], errors="coerce").fillna(0).astype(int)
         meals["meal_type"] = meals["meal_type"].astype(str).str.strip().str.lower()
         meals["diet_type"] = meals["diet_type"].astype(str).str.strip().str.lower()
+
+        # Load trained ML model if it exists
+        model_path = os.path.join(os.path.dirname(__file__), "ML", "meal_preference_model.pkl")
+        encoder_path = os.path.join(os.path.dirname(__file__), "ML", "preference_label_encoder.pkl")
+
+        if os.path.exists(model_path) and os.path.exists(encoder_path):
+            _PREF_MODEL = joblib.load(model_path)
+            _PREF_LABEL_ENCODER = joblib.load(encoder_path)
+            print("[AI_ENGINE] ML preference model loaded successfully.")
+        else:
+            _PREF_MODEL = None
+            _PREF_LABEL_ENCODER = None
+            print("[AI_ENGINE] ML model files not found. Running without ML ranking.")
 
         # precompute macros + ingredient name list for search/shopping list
         name_map = ing.set_index("ingredient_id")["ingredient_name"].to_dict()
@@ -137,7 +171,12 @@ def init_datasets(data_dir: str) -> None:
     except Exception as e:
         _ING_DF = None
         _MEALS_DF = None
-        _META = {"loaded": False, "rows_loaded": {"ingredients": 0, "meals": 0}, "data_dir": data_dir, "error": str(e)}
+        _META = {
+            "loaded": False,
+            "rows_loaded": {"ingredients": 0, "meals": 0},
+            "data_dir": data_dir,
+            "error": str(e),
+        }
         raise
 
 
@@ -176,6 +215,8 @@ def search_recipes(q: str, limit: int = 20) -> List[Dict[str, Any]]:
             "protein_g": float(r["protein_g"]),
             "carbs_g": float(r["carbs_g"]),
             "fat_g": float(r["fat_g"]),
+            "fiber_g": float(r.get("fiber_g", 0.0)),
+            "sugar_g": float(r.get("sugar_g", 0.0)),
             "diet_type": str(r["diet_type"]),
             "ingredients": r["ingredients_names"],
         })
@@ -189,6 +230,42 @@ def _score_row(row: pd.Series, target_cal: float, goal: GoalType) -> float:
     fat_pen = -p["fat_pen_w"] * float(row["fat_g"])
     time_pen = -p["time_pen_w"] * float(row["prep_time_min"])
     return cal_pen + prot + fat_pen + time_pen
+
+
+def _predict_meal_preference(row: pd.Series) -> Dict[str, Any]:
+    global _PREF_MODEL, _PREF_LABEL_ENCODER
+
+    if _PREF_MODEL is None or _PREF_LABEL_ENCODER is None:
+        return {
+            "predicted_preference": "Unknown",
+            "preference_score": 0.0,
+        }
+
+    feature_row = pd.DataFrame([{
+        "calories": float(row["calories"]),
+        "protein": float(row["protein_g"]),
+        "carbs": float(row["carbs_g"]),
+        "fat": float(row["fat_g"]),
+        "fiber": float(row.get("fiber_g", 0.0)),
+        "sugar": float(row.get("sugar_g", 0.0)),
+        "prep_time": float(row["prep_time_min"]),
+    }])
+
+    probs = _PREF_MODEL.predict_proba(feature_row)[0]
+    pred_idx = int(np.argmax(probs))
+    pred_label = _PREF_LABEL_ENCODER.inverse_transform([pred_idx])[0]
+
+    class_names = list(_PREF_LABEL_ENCODER.classes_)
+    if "High" in class_names:
+        high_idx = class_names.index("High")
+        pref_score = float(probs[high_idx])
+    else:
+        pref_score = float(probs[pred_idx])
+
+    return {
+        "predicted_preference": pred_label,
+        "preference_score": round(pref_score, 4),
+    }
 
 
 def _pick_meal(
@@ -220,10 +297,19 @@ def _pick_meal(
     if pool.empty:
         return None
 
-    pool["score"] = pool.apply(lambda r: _score_row(r, target_cal, goal), axis=1)
-    pool = pool.sort_values("score", ascending=False).head(60)
+    pool["base_score"] = pool.apply(lambda r: _score_row(r, target_cal, goal), axis=1)
 
-    rec = pool.sample(1).iloc[0].to_dict()
+    ml_preds = pool.apply(_predict_meal_preference, axis=1)
+    pool["predicted_preference"] = ml_preds.apply(lambda x: x["predicted_preference"])
+    pool["preference_score"] = ml_preds.apply(lambda x: x["preference_score"])
+
+    # Combine rule-based score + ML score
+    pool["score"] = pool["base_score"] + (pool["preference_score"] * 100.0)
+
+    pool = pool.sort_values("score", ascending=False).head(20)
+
+    # Pick the top result to keep recommendations strong and deterministic
+    rec = pool.iloc[0].to_dict()
     return rec
 
 
@@ -239,6 +325,10 @@ def _build_meal_payload(rec: Dict[str, Any], slot: str, target: float) -> Dict[s
         "protein_g": round(float(rec["protein_g"]), 1),
         "carbs_g": round(float(rec["carbs_g"]), 1),
         "fat_g": round(float(rec["fat_g"]), 1),
+        "fiber_g": round(float(rec.get("fiber_g", 0.0)), 1),
+        "sugar_g": round(float(rec.get("sugar_g", 0.0)), 1),
+        "predicted_preference": str(rec.get("predicted_preference", "Unknown")),
+        "preference_score": round(float(rec.get("preference_score", 0.0)), 4),
         "ingredients": rec["ingredients_names"],
         "diet_type": str(rec["diet_type"]),
     }

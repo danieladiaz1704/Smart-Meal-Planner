@@ -33,14 +33,12 @@ export default function PlannerPage() {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  // ✅ NEW: work with new backend shape: result.plan.days[]
   const days = result?.plan?.days ?? [];
   const activeDayObj = useMemo(
     () => (Array.isArray(days) ? days.find((d: any) => d.day === activeDay) ?? days[0] : null),
     [days, activeDay]
   );
 
-  // progress animation
   useEffect(() => {
     if (!loading) return;
 
@@ -56,7 +54,6 @@ export default function PlannerPage() {
     return () => clearInterval(t);
   }, [loading]);
 
-  // cleanup: abort if user leaves page
   useEffect(() => {
     return () => abortRef.current?.abort();
   }, []);
@@ -119,7 +116,6 @@ export default function PlannerPage() {
     }
   };
 
-  // ✅ Replace meal handler used by MealCard
   const handleReplace = async (slot: string, target: number, excludeIds: number[]) => {
     if (!result?.plan) return;
 
@@ -154,7 +150,6 @@ export default function PlannerPage() {
 
       const newMeal = data.meal;
 
-      // Update state: replace meal inside active day
       const newDays = (result.plan.days ?? []).map((d: any) => {
         if (d.day !== activeDay) return d;
 
@@ -162,7 +157,6 @@ export default function PlannerPage() {
           (mm.slot ?? mm.meal_type) === slot ? newMeal : mm
         );
 
-        // recompute day totals
         const t = updatedMeals.reduce(
           (acc: any, mm: any) => {
             acc.calories += Number(mm.calories || 0);
@@ -186,7 +180,6 @@ export default function PlannerPage() {
         };
       });
 
-      // recompute overall totals
       const overall = newDays.reduce(
         (acc: any, d: any) => {
           acc.calories += Number(d.totals?.calories || 0);
@@ -198,7 +191,6 @@ export default function PlannerPage() {
         { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }
       );
 
-      // recompute shopping list locally
       const ctr = new Map<string, number>();
       for (const d of newDays) {
         for (const mm of d.meals ?? []) {
@@ -209,6 +201,7 @@ export default function PlannerPage() {
           }
         }
       }
+
       const shoppingItems = Array.from(ctr.entries())
         .sort((a, b) => b[1] - a[1])
         .map(([ingredient, count]) => ({ ingredient, count }));
@@ -239,11 +232,10 @@ export default function PlannerPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-rose-200/40 to-transparent" />
 
       <div className="relative mx-auto max-w-6xl px-5 py-8">
-        {/* Top bar */}
-        <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <button
             onClick={() => router.push("/")}
-            className="rounded-2xl px-4 py-2 border border-slate-200 bg-white font-semibold hover:border-rose-200 transition"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-2 font-semibold hover:border-rose-200 transition"
           >
             ← Back
           </button>
@@ -255,7 +247,6 @@ export default function PlannerPage() {
         </div>
 
         <div className="grid lg:grid-cols-[360px_1fr] gap-6 items-start overflow-hidden">
-          {/* LEFT */}
           <section className="rounded-3xl border border-slate-200 bg-white/85 backdrop-blur p-6 shadow-sm space-y-5">
             <div className="space-y-2">
               <h1 className="text-2xl font-extrabold">Generate your plan</h1>
@@ -346,7 +337,6 @@ export default function PlannerPage() {
               </label>
             </div>
 
-            {/* Progress bar */}
             {loading && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold text-slate-600">
@@ -380,7 +370,6 @@ export default function PlannerPage() {
             )}
           </section>
 
-          {/* RIGHT */}
           <section className="min-w-0 overflow-hidden">
             <div className="rounded-3xl border border-slate-200 bg-white/85 backdrop-blur shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
@@ -434,7 +423,7 @@ export default function PlannerPage() {
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
                       <p className="text-xs font-bold text-slate-700">Explainability</p>
                       <p className="text-xs text-slate-600 mt-1">
-                        Rule-Based Filtering + Goal-Aware Ranking + Variety Penalty + Per-meal Health Rules
+                        Rule-Based Filtering + Goal-Aware Ranking + Machine Learning Preference Score
                       </p>
                     </div>
                   </>
@@ -442,7 +431,6 @@ export default function PlannerPage() {
               </div>
             </div>
 
-            {/* Plan totals */}
             {result?.plan?.overall_totals && (
               <div className="grid sm:grid-cols-4 gap-3 mt-4">
                 <Stat title="Plan calories" value={`${result.plan.overall_totals.calories} kcal`} />
@@ -452,7 +440,6 @@ export default function PlannerPage() {
               </div>
             )}
 
-            {/* Shopping list */}
             {result?.plan?.shopping_list?.items?.length ? (
               <div className="mt-4 rounded-3xl border border-slate-200 bg-white/85 backdrop-blur shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-100 flex items-center justify-between gap-3">
@@ -492,8 +479,6 @@ export default function PlannerPage() {
     </main>
   );
 }
-
-/* ---------------- UI components ---------------- */
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -535,6 +520,18 @@ function MealCard({
 }) {
   const title = meal.slot && meal.slot !== meal.meal_type ? `${meal.meal_type} (${meal.slot})` : meal.meal_type;
 
+  const preference = meal.predicted_preference;
+  const score = typeof meal.preference_score === "number" ? meal.preference_score : null;
+
+  const preferenceBadgeClass =
+    preference === "High"
+      ? "bg-green-100 text-green-700 border-green-200"
+      : preference === "Medium"
+      ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+      : preference === "Low"
+      ? "bg-red-100 text-red-700 border-red-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
+
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm overflow-hidden">
       <div className="flex items-start justify-between gap-4">
@@ -542,12 +539,37 @@ function MealCard({
           <p className="text-xs font-bold text-slate-500">
             Meal {index} • {title}
           </p>
+
           <p className="text-sm font-extrabold text-slate-900 truncate">{meal.name}</p>
+
+          {preference && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-bold ${preferenceBadgeClass}`}
+              >
+                {preference} Preference
+              </span>
+
+              {score !== null && score >= 0.85 && (
+                <span className="rounded-full border border-orange-200 bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">
+                  🔥 Top Recommendation
+                </span>
+              )}
+            </div>
+          )}
+
+          {score !== null && (
+            <p className="mt-2 text-xs text-slate-500">
+              Match Score: {(score * 100).toFixed(0)}%
+            </p>
+          )}
 
           <div className="mt-2 flex flex-wrap gap-2 text-xs">
             <Tag label={`P ${meal.protein_g}g`} />
             <Tag label={`C ${meal.carbs_g}g`} />
             <Tag label={`F ${meal.fat_g}g`} />
+            {meal.fiber_g !== undefined && <Tag label={`Fiber ${meal.fiber_g}g`} />}
+            {meal.sugar_g !== undefined && <Tag label={`Sugar ${meal.sugar_g}g`} />}
           </div>
 
           <p className="text-xs text-slate-600 mt-2 line-clamp-2">
@@ -576,7 +598,9 @@ function MealCard({
           <p className="text-xs text-slate-500 mt-1">Target {meal.target_calories} kcal</p>
 
           <button
-            onClick={() => onReplace(meal.slot ?? meal.meal_type, Number(meal.target_calories), [Number(meal.recipe_id)])}
+            onClick={() =>
+              onReplace(meal.slot ?? meal.meal_type, Number(meal.target_calories), [Number(meal.recipe_id)])
+            }
             className="mt-3 rounded-2xl px-4 py-2 border border-slate-200 bg-white font-bold hover:border-rose-200 transition text-sm"
           >
             Replace
