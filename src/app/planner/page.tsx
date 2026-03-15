@@ -541,6 +541,9 @@ function MealCard({
           </p>
 
           <p className="text-sm font-extrabold text-slate-900 truncate">{meal.name}</p>
+          <p className="text-xs text-slate-500 mt-1">
+          ⏱ Prep time: {meal.minutes} min
+        </p>
 
           {preference && (
             <div className="mt-3 flex flex-wrap gap-2">
