@@ -13,12 +13,38 @@ export default function SignupPage() {
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (email && password) {
-      alert("Account created successfully!");
-      router.push("/login");
-    } else {
+    if (!email || !password) {
       alert("Please fill all fields");
+      return;
     }
+
+    // Get existing users from localStorage
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    // Check if user already exists
+    const existingUser = users.find((u: any) => u.email === email);
+
+    if (existingUser) {
+      alert("User already exists. Please login.");
+      return;
+    }
+
+    // Create new user object
+    const newUser = {
+      email: email,
+      password: password,
+      meals: []
+    };
+
+    // Add new user to the users list
+    users.push(newUser);
+
+    // Save updated users list
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Account created successfully!");
+
+    router.push("/login");
   };
 
   return (

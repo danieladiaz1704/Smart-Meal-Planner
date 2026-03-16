@@ -14,6 +14,14 @@ type PlanAPIResponse =
 export default function PlannerPage() {
   const router = useRouter();
 
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+
+    if (!currentUser) {
+      router.push("/login");
+    }
+  }, []);
+
   const [form, setForm] = useState({
     calories: 1800,
     meals_per_day: 3,

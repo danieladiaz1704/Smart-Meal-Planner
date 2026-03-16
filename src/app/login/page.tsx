@@ -10,15 +10,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (email && password) {
-      router.push("/planner");
-    } else {
-      alert("Please enter email and password");
-    }
-  };
+  // Get users from localStorage
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+  // Find the user by email
+  const user = users.find((u: any) => u.email === email);
+
+  // If user does not exist
+  if (!user) {
+    alert("User not found. Please sign up first.");
+    return;
+  }
+
+  // If password is incorrect
+  if (user.password !== password) {
+    alert("Incorrect password");
+    return;
+  }
+
+  // Save logged-in user session
+  localStorage.setItem("currentUser", JSON.stringify(user));
+
+  // Redirect to planner page
+  router.push("/planner");
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 relative">
