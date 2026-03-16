@@ -1,9 +1,24 @@
 "use client";
+"use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Landing() {
+
   const router = useRouter();
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+
+    if (currentUser) {
+      setUser(JSON.parse(currentUser));
+    }
+  }, []);
+  
+  
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-orange-50 text-slate-900 overflow-hidden">
@@ -66,19 +81,42 @@ export default function Landing() {
               Features
             </button>
 
-            <button
-  onClick={() => router.push("/login")}
-  className="rounded-2xl px-4 py-2 border border-slate-200 bg-white font-semibold hover:border-rose-200 transition"
->
-  Login
-</button>
+            {user ? (
+  <>
+    <button
+      onClick={() => router.push("/planner")}
+      className="rounded-2xl px-4 py-2 bg-gray-200 font-semibold hover:bg-gray-300 transition"
+    >
+      My Planner
+    </button>
 
-            <button
-              onClick={() => router.push("/planner")}
-              className="rounded-2xl px-4 py-2 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
-            >
-              Create plan →
-            </button>
+    <button
+      onClick={() => {
+        localStorage.removeItem("currentUser");
+        router.push("/");
+      }}
+      className="rounded-2xl px-4 py-2 bg-red-500 text-white font-bold hover:opacity-90 transition"
+    >
+      Logout
+    </button>
+  </>
+) : (
+  <>
+    <button
+      onClick={() => router.push("/login")}
+      className="rounded-2xl px-4 py-2 border border-slate-200"
+    >
+      Login
+    </button>
+
+    <button
+      onClick={() => router.push("/planner")}
+      className="rounded-2xl px-4 py-2 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
+    >
+      Create plan →
+    </button>
+  </>
+)}
           </div>
         </header>
 
