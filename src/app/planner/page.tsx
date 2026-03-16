@@ -68,65 +68,88 @@ export default function PlannerPage() {
     return () => abortRef.current?.abort();
   }, []);
 
-  const handleGenerate = async () => {
-    if (loading) return;
+ const handleGenerate = async () => {
+  if (loading) return;
 
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
+  abortRef.current?.abort();
+  const controller = new AbortController();
+  abortRef.current = controller;
 
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    try {
-      const payload = {
-        calories: Number(form.calories),
-        meals_per_day: Number(form.meals_per_day),
-        days: Number(form.days),
-        diet_type: form.diet_type,
-        goal: form.goal,
-        allergies: form.allergies
-          .split(",")
-          .map((a) => a.trim())
-          .filter(Boolean),
-        exclude_ultra_processed: form.exclude_ultra_processed,
-        variety: form.variety,
-        prep_time_preference: form.prep_time_preference,
-        macro_preference: form.macro_preference,
-      };
+  try {
+    const payload = {
+      calories: Number(form.calories),
+      meals_per_day: Number(form.meals_per_day),
+      days: Number(form.days),
+      diet_type: form.diet_type,
+      goal: form.goal,
+      allergies: form.allergies
+        .split(",")
+        .map((a) => a.trim())
+        .filter(Boolean),
+      exclude_ultra_processed: form.exclude_ultra_processed,
+      variety: form.variety,
+      prep_time_preference: form.prep_time_preference,
+      macro_preference: form.macro_preference,
+    };
 
-      const res = await fetch(`${API_BASE}/generate-plan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
+    const res = await fetch(`${API_BASE}/generate-plan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
 
-      const data = (await res.json()) as any;
+    const data = (await res.json()) as any;
 
-      if (!res.ok) throw new Error(data?.detail ?? data?.message ?? "Backend error");
-      if (data?.status !== "ok") throw new Error(data?.message ?? "Unable to generate plan");
+    if (!res.ok) throw new Error(data?.detail ?? data?.message ?? "Backend error");
+    if (data?.status !== "ok") throw new Error(data?.message ?? "Unable to generate plan");
 
-      setResult(data);
-      setActiveDay(1);
+    /* ---------- STORE RESULT ---------- */
 
-      setProgress(100);
-      setTimeout(() => setProgress(0), 400);
-    } catch (e: any) {
-      const msg =
-        e?.name === "AbortError"
-          ? "Request timed out. Try again (or your backend is slow / stuck)."
-          : e?.message ?? "Unknown error";
-      setResult(null);
-      setError(msg);
-      setProgress(0);
-    } finally {
-      clearTimeout(timeout);
-      setLoading(false);
+    setResult(data);
+    setActiveDay(1);
+
+    /* ---------- SAVE PLAN FOR USER ---------- */
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+    if (currentUser?.email && data?.plan) {
+      const savedPlans = JSON.parse(localStorage.getItem("savedPlans") || "{}");
+
+      if (!savedPlans[currentUser.email]) {
+        savedPlans[currentUser.email] = [];
+      }
+
+      savedPlans[currentUser.email].push(data.plan);
+
+      localStorage.setItem("savedPlans", JSON.stringify(savedPlans));
     }
-  };
+
+    /* ---------- UI PROGRESS ---------- */
+
+    setProgress(100);
+    setTimeout(() => setProgress(0), 400);
+
+  } catch (e: any) {
+    const msg =
+      e?.name === "AbortError"
+        ? "Request timed out. Try again (or your backend is slow / stuck)."
+        : e?.message ?? "Unknown error";
+
+    setResult(null);
+    setError(msg);
+    setProgress(0);
+
+  } finally {
+    clearTimeout(timeout);
+    setLoading(false);
+  }
+};
 
   const handleReplace = async (slot: string, target: number, excludeIds: number[]) => {
     if (!result?.plan) return;
