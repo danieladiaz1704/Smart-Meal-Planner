@@ -17,19 +17,23 @@ This project focuses on the frontend interface where users can input dietary pre
 - Next.js (React + TypeScript)
 - Tailwind CSS
 
-## How to Run the Project frontend
-```bash
+## Running the Project
+
+### 1. Install backend dependencies
+cd server
+pip install pandas scikit-learn joblib
+
+### 2. Train the ML preference model (run once)
+python ML/meal_preference_model.py
+
+This will generate:
+- server/ML/meal_preference_model.pkl
+- server/ML/preference_label_encoder.pkl
+
+### 3. Start the backend
+python -m uvicorn main:app --reload
+
+### 4. Start the frontend
+cd smart-meal-planner-frontend
 npm install
 npm run dev
-
-### Backend
-- FastAPI
-- Python
-- Pandas
-- CSV-based in recipes csv
-
-cd server
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-python -m uvicorn main:app --reload

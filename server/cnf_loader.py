@@ -6,7 +6,7 @@ from typing import Dict, Tuple
 
 import pandas as pd
 
-ENC = "utf-8"  # si falla, prueba "latin1"
+ENC = "utf-8"  
 
 INGREDIENTS_FILE = "ingredients_db.csv"
 MEALS_FILE = "meals_recipes.csv"

@@ -1,0 +1,181 @@
+meal_id,meal_name,meal_type,diet_type,prep_time,calories,protein,carbs,fat,fiber,sugar,preference
+1001,Greek Yogurt Bowl (berries + chia),breakfast,vegetarian,8,251.42,28.29,25.65,4.92,6.05,17.0,Medium
+1002,Skyr Bowl (berries + flax),breakfast,vegetarian,6,237.2,29.96,19.82,4.99,4.53,14.57,Low
+1003,Cottage Cheese + Pineapple + walnuts,breakfast,vegetarian,5,338.5,27.05,25.3,12.07,2.68,18.21,Medium
+1004,Protein Oats (banana + whey),breakfast,vegetarian,10,479.1,33.15,76.27,6.69,11.04,16.34,High
+1005,Vegan Protein Oats (banana + pea),breakfast,vegan,10,474.1,31.9,76.27,6.69,11.79,15.59,High
+1006,Overnight Oats (almond milk + blueberries + chia),breakfast,vegan,7,373.02,13.95,58.48,10.49,13.05,9.6,Medium
+1007,Egg White Omelette + spinach + toast,breakfast,non-vegetarian,12,303.4,35.33,32.76,3.66,6.3,5.81,High
+1008,Avocado Toast + eggs,breakfast,non-vegetarian,12,452.6,24.8,39.85,23.65,10.13,6.15,High
+1009,Soy Smoothie (banana + spinach + pea protein),breakfast,vegan,7,298.1,30.06,36.27,6.6,7.19,16.13,Medium
+1010,Milk Smoothie (banana + whey),breakfast,vegetarian,7,331.8,29.82,42.36,6.86,3.62,28.14,Medium
+1011,Chia Pudding (almond milk + strawberries),breakfast,vegan,8,197.4,6.46,20.52,11.04,11.5,5.88,Low
+1012,Toast + peanut butter + banana,breakfast,vegan,6,422.0,16.72,64.16,13.72,9.76,21.0,Medium
+1013,Toast + almond butter + blueberries,breakfast,vegan,6,359.42,14.81,49.27,13.71,9.4,14.42,Medium
+1014,Granola + Greek yogurt + strawberries,breakfast,vegetarian,5,380.15,28.0,45.96,10.24,5.55,24.6,Medium
+1015,Granola + soy milk + blueberries,breakfast,vegan,5,375.0,13.95,50.75,14.8,7.4,23.0,Medium
+1016,Tofu Scramble (spinach + peppers),breakfast,vegan,12,370.8,36.54,12.96,22.88,5.4,4.8,High
+1017,Tofu Scramble (mushrooms + onions),breakfast,vegan,12,378.2,37.76,14.88,22.76,4.42,5.72,High
+1018,Eggs + whole wheat toast + tomato,breakfast,non-vegetarian,10,358.9,25.42,33.14,15.1,5.72,7.39,High
+1019,Skyr + mango + pumpkin seeds,breakfast,vegetarian,5,300.08,32.14,30.82,6.9,2.8,27.98,Medium
+1020,Greek yogurt + apple + cinnamon,breakfast,vegetarian,5,230.44,26.28,31.32,1.32,4.66,24.64,Low
+1021,Vegan oats (apple + cinnamon + flax),breakfast,vegan,10,394.39,13.38,69.68,9.05,14.52,17.49,Medium
+1022,Avocado + tomato toast,breakfast,vegan,7,341.8,12.81,43.11,15.3,11.88,7.46,Medium
+1023,Egg + cheese toast,breakfast,non-vegetarian,10,417.5,31.7,31.0,19.34,4.76,5.49,High
+1024,Protein French Toast (egg + bread + whey),breakfast,non-vegetarian,15,445.3,40.7,40.0,14.98,6.52,7.03,High
+1025,Sweet oats (banana + maple),breakfast,vegan,10,418.1,13.15,83.82,5.19,10.54,24.34,Medium
+1026,Greek Yogurt Bowl (banana + flax),breakfast,vegetarian,5,289.9,28.68,34.69,5.52,5.33,21.36,Medium
+1027,Skyr + apple + chia,breakfast,vegetarian,5,276.4,29.57,33.53,3.85,6.8,24.56,Medium
+1028,Cottage Cheese + berries + almonds,breakfast,vegetarian,5,327.05,28.33,25.64,10.12,4.92,16.52,High
+1029,Protein Oats (apple + cinnamon + whey),breakfast,vegetarian,10,439.64,32.27,67.09,6.59,11.86,14.22,High
+1030,Protein Oats (blueberries + whey),breakfast,vegetarian,10,423.6,32.46,61.96,6.6,10.08,10.7,High
+1031,Vegan Protein Oats (blueberries + pea),breakfast,vegan,10,418.6,31.21,61.96,6.6,10.83,9.95,High
+1032,Overnight Oats (soy milk + apple + chia),breakfast,vegan,8,426.72,19.74,65.13,12.02,14.69,13.96,Medium
+1033,Egg White Omelette + mushrooms + toast,breakfast,non-vegetarian,12,309.3,36.4,33.54,3.68,5.76,7.53,High
+1034,Egg White Omelette + peppers + toast,breakfast,non-vegetarian,12,315.2,34.2,35.64,3.65,6.65,9.31,High
+1035,Avocado Toast + egg whites,breakfast,non-vegetarian,10,387.6,28.3,39.8,13.95,10.13,6.1,High
+1036,Soy Smoothie (berries + pea protein),breakfast,vegan,7,248.7,28.12,24.51,6.48,6.27,13.17,Low
+1037,Milk Smoothie (berries + whey),breakfast,vegetarian,7,296.2,29.62,32.76,6.98,4.02,25.42,Medium
+1038,Chia Pudding (soy milk + blueberries),breakfast,vegan,8,261.0,13.08,29.28,12.48,12.5,11.0,Medium
+1039,Toast + peanut butter + apple,breakfast,vegan,6,365.84,15.26,52.96,12.6,9.4,18.66,Medium
+1040,Toast + almond butter + banana,breakfast,vegan,6,397.12,15.28,59.02,13.74,9.84,17.62,Medium
+1041,Granola + skyr + blueberries,breakfast,vegetarian,5,381.8,28.9,48.9,8.74,5.2,28.4,Medium
+1042,Tofu Scramble + kale + toast,breakfast,vegan,15,544.3,46.54,41.74,26.06,10.44,7.03,High
+1043,Eggs + spinach + whole wheat toast,breakfast,non-vegetarian,10,358.3,26.44,32.18,15.18,6.08,5.55,High
+1044,Protein French Toast (berries),breakfast,non-vegetarian,15,470.9,41.26,46.16,15.22,8.12,10.95,High
+1045,Oats + mango + chia,breakfast,vegan,10,380.9,14.28,65.62,8.3,12.46,14.4,Medium
+2001,Grilled Chicken Salad (olive oil),lunch,non-vegetarian,15,392.9,54.38,5.2,16.36,1.44,2.0,Medium
+2002,Tuna Salad Bowl (lettuce + tomato),lunch,non-vegetarian,12,272.92,40.93,5.83,9.84,2.12,2.98,Medium
+2003,Turkey Sandwich (whole wheat),lunch,non-vegetarian,10,532.4,51.06,50.46,14.54,8.68,7.26,High
+2004,Vegan Chickpea Salad (cucumber + tomato),lunch,vegan,12,482.2,21.4,66.9,16.02,18.42,14.86,High
+2005,Lentil Bowl (spinach + carrots),lunch,vegan,20,418.92,25.86,62.16,9.44,24.1,8.68,High
+2006,Tofu Quinoa Bowl (broccoli),lunch,vegan,20,606.52,41.9,58.2,27.19,11.54,5.37,High
+2007,Tempeh Brown Rice Bowl,lunch,vegan,18,576.2,37.73,71.79,18.9,8.66,5.96,High
+2008,Chicken + Brown Rice + Broccoli,lunch,non-vegetarian,20,638.94,63.46,63.2,14.82,8.64,3.94,High
+2009,Salmon Quinoa Salad,lunch,non-vegetarian,20,631.52,41.04,40.66,32.38,6.08,2.26,High
+2010,Shrimp Rice Bowl (peppers + onion),lunch,non-vegetarian,18,525.4,50.34,74.74,1.62,4.42,7.78,High
+2011,Vegan Bean + Rice Bowl (avocado),lunch,vegan,20,710.0,27.38,124.55,12.17,25.61,3.17,Medium
+2012,Black Beans + Quinoa Bowl,lunch,vegan,20,619.12,29.5,99.3,13.1,25.94,5.06,High
+2013,Chickpeas + Couscous Bowl,lunch,vegan,18,660.12,27.06,108.2,13.74,18.78,11.52,High
+2014,Turkey Chili (beans + tomato),lunch,non-vegetarian,25,550.2,59.61,49.83,13.96,16.74,6.9,High
+2015,Lentil Soup + whole wheat bread,lunch,vegan,25,554.5,35.68,98.28,4.28,30.14,15.31,High
+2016,Chicken Wrap (whole wheat tortilla),lunch,non-vegetarian,12,572.5,54.64,44.24,19.42,6.38,3.38,High
+2017,Vegan Hummus Wrap,lunch,vegan,10,468.2,18.2,63.82,18.12,13.98,5.0,Medium
+2018,Tofu Stir Fry + rice (quick),lunch,vegan,20,617.56,41.45,75.39,18.49,5.9,6.51,High
+2019,Beef + rice bowl (onion + peppers),lunch,non-vegetarian,20,772.2,51.34,74.38,26.58,4.42,7.78,Medium
+2020,Cod + potatoes + greens,lunch,non-vegetarian,25,488.34,49.39,54.66,8.11,6.82,3.24,High
+2021,Egg Salad Sandwich,lunch,non-vegetarian,10,555.6,31.88,51.8,26.12,8.68,8.6,High
+2022,Vegan Lentil + quinoa salad,lunch,vegan,20,556.92,28.42,85.94,12.4,22.92,7.28,High
+2023,Chicken + sweet potato plate,lunch,non-vegetarian,25,597.84,62.74,56.76,13.24,9.9,17.14,High
+2024,Paneer rice bowl,lunch,vegetarian,25,825.64,31.68,74.4,42.02,3.4,8.06,Medium
+2025,Vegetarian chickpea + quinoa bowl,lunch,vegetarian,20,650.72,27.92,98.92,17.16,21.84,12.04,High
+2026,Chicken Quinoa Salad (olive oil + tomato),lunch,non-vegetarian,18,580.72,59.54,44.56,17.54,7.28,4.86,High
+2027,Turkey Quinoa Bowl (broccoli),lunch,non-vegetarian,20,560.04,59.4,53.1,12.96,9.5,4.35,High
+2028,Chicken Rice Bowl (peppers + spinach),lunch,non-vegetarian,18,611.3,60.72,69.76,7.32,4.3,4.66,High
+2029,Salmon Brown Rice Bowl,lunch,non-vegetarian,20,681.04,41.92,61.1,29.38,7.86,3.43,High
+2030,Cod Quinoa Plate (greens),lunch,non-vegetarian,20,474.14,51.35,40.86,11.32,6.58,1.9,High
+2031,Shrimp Quinoa Salad,lunch,non-vegetarian,18,471.24,52.8,43.9,10.2,6.48,3.62,High
+2032,Tuna Rice Bowl (cucumber + tomato),lunch,non-vegetarian,12,467.0,45.4,63.5,2.4,2.5,4.5,Medium
+2033,Chicken Lentil Bowl,lunch,non-vegetarian,22,569.54,68.04,46.16,12.52,18.7,4.2,High
+2034,Turkey Sweet Potato Plate,lunch,non-vegetarian,22,539.44,55.68,61.6,9.68,12.08,18.32,High
+2035,Beef Quinoa Bowl (broccoli),lunch,non-vegetarian,22,720.04,53.72,48.84,34.02,8.94,4.17,Medium
+2036,Tofu Brown Rice Bowl (broccoli),lunch,vegan,20,563.1,41.61,67.69,18.34,10.36,4.72,High
+2037,Tofu Lentil Bowl,lunch,vegan,22,583.54,52.43,51.92,22.82,21.08,5.32,High
+2038,Tempeh Quinoa Bowl (kale),lunch,vegan,22,638.84,44.66,63.67,28.11,11.66,4.01,High
+2039,Seitan Rice Bowl (peppers),lunch,vegan,18,772.5,97.29,86.09,3.48,4.2,5.3,Medium
+2040,Vegan Lentil Wrap,lunch,vegan,12,477.8,24.8,83.02,7.32,21.0,7.88,High
+2041,Chickpea Spinach Salad,lunch,vegan,12,465.62,22.73,65.82,14.2,19.46,13.44,High
+2042,Black Bean Sweet Potato Bowl,lunch,vegan,22,542.4,26.25,110.6,1.88,29.01,20.36,Medium
+2043,Paneer Quinoa Bowl,lunch,vegetarian,22,781.44,37.76,56.57,45.21,9.22,7.06,Medium
+2044,Mozzarella Tomato Sandwich,lunch,vegetarian,10,472.8,31.46,56.06,14.92,9.88,10.36,High
+2045,Egg + avocado toast plate,lunch,non-vegetarian,12,594.4,33.32,59.59,27.49,13.81,10.73,High
+3001,Baked Salmon + quinoa + broccoli,dinner,non-vegetarian,25,707.84,47.84,55.2,32.62,10.28,4.86,Medium
+3002,Grilled Chicken + veggies + rice,dinner,non-vegetarian,25,706.94,68.66,72.8,14.14,5.04,2.94,Medium
+3003,Lean Beef + sweet potato + spinach,dinner,non-vegetarian,30,748.44,52.12,61.68,32.38,11.0,18.52,Medium
+3004,Tofu stir fry + brown rice,dinner,vegan,20,610.76,45.49,66.19,21.61,9.64,8.13,High
+3005,Tempeh quinoa bowl + peppers,dinner,vegan,25,688.54,45.08,70.56,29.3,11.48,7.86,High
+3006,Black beans + rice + avocado,dinner,vegan,25,782.0,30.01,136.5,13.82,28.25,3.62,Medium
+3007,Chickpeas + couscous + veggies,dinner,vegan,25,708.14,30.72,119.25,12.65,21.58,14.55,Medium
+3008,Lentil curry bowl + rice,dinner,vegan,35,731.52,31.62,128.78,9.9,24.1,7.8,Medium
+3009,Shrimp stir fry + rice,dinner,non-vegetarian,20,559.76,56.13,76.59,1.81,4.0,6.17,High
+3010,Cod + potatoes + broccoli,dinner,non-vegetarian,30,584.64,58.04,71.4,8.8,10.84,6.42,High
+3011,Turkey burger + salad,dinner,non-vegetarian,20,350.32,54.68,7.58,11.32,2.74,3.92,Medium
+3012,Chicken wrap plate (tortilla + salad),dinner,non-vegetarian,15,639.5,62.02,50.12,20.98,7.34,3.89,High
+3013,Vegan seitan rice bowl,dinner,vegan,20,815.7,101.05,95.69,3.82,5.92,3.0,Medium
+3014,Tofu peanut sauce noodles,dinner,vegan,25,800.6,50.96,85.68,29.74,9.38,10.06,Medium
+3015,Chicken pasta bowl (whole wheat),dinner,non-vegetarian,30,729.24,71.28,76.68,15.12,12.96,4.56,Medium
+3016,Vegetarian paneer rice bowl,dinner,vegetarian,25,965.14,40.84,85.2,49.86,5.12,6.36,Low
+3017,Egg shakshuka-style (tomato + peppers),dinner,non-vegetarian,25,344.34,22.68,17.43,21.8,5.16,12.41,High
+3018,Vegan tofu + quinoa + kale,dinner,vegan,25,663.84,48.84,63.42,28.66,13.48,5.94,High
+3019,Beef burrito bowl,dinner,non-vegetarian,25,998.4,68.01,110.5,28.66,15.93,2.82,Low
+3020,Vegetarian chili bowl (beans + tomato),dinner,vegan,35,579.0,37.92,107.22,2.46,34.08,8.92,Medium
+3021,Chicken + brown rice + peas,dinner,non-vegetarian,25,730.14,71.62,72.0,15.48,10.44,7.8,Medium
+3022,Salmon + sweet potato + greens,dinner,non-vegetarian,30,677.04,41.92,61.68,28.98,11.0,18.52,High
+3023,Vegan tempeh + broccoli + rice,dinner,vegan,25,706.6,45.61,95.59,20.2,8.1,3.34,Medium
+3024,Turkey meat bowl (turkey + rice + peppers),dinner,non-vegetarian,25,732.44,55.76,75.6,21.54,3.9,6.12,Medium
+3025,Vegan chickpeas + spinach + quinoa,dinner,vegan,25,696.24,31.8,109.14,16.22,24.64,12.86,High
+3026,Chicken Quinoa Plate + broccoli,dinner,non-vegetarian,25,675.24,70.52,59.46,17.38,10.84,5.04,High
+3027,Chicken Sweet Potato + broccoli,dinner,non-vegetarian,25,645.24,66.04,67.2,13.72,13.26,19.96,High
+3028,Turkey Brown Rice Bowl,dinner,non-vegetarian,25,686.84,56.24,63.6,22.98,7.26,6.84,High
+3029,Cod Quinoa + greens,dinner,non-vegetarian,25,545.44,58.0,49.74,12.3,7.92,2.3,High
+3030,Shrimp Brown Rice Bowl,dinner,non-vegetarian,22,513.1,56.45,64.49,3.24,7.34,6.88,High
+3031,Tuna Pasta Bowl (whole wheat),dinner,non-vegetarian,20,576.44,53.28,70.68,9.94,12.0,4.44,High
+3032,Beef Quinoa + broccoli,dinner,non-vegetarian,28,803.24,58.92,59.46,36.4,10.84,5.04,Medium
+3033,Turkey Sweet Potato Bowl,dinner,non-vegetarian,25,611.44,53.42,57.48,20.44,10.34,17.22,High
+3034,Chicken Lentil Plate,dinner,non-vegetarian,25,666.34,78.78,59.2,13.72,23.12,7.04,High
+3035,Salmon Brown Rice + kale,dinner,non-vegetarian,28,720.74,45.14,63.46,31.25,9.06,3.68,Medium
+3036,Tofu Quinoa + broccoli,dinner,vegan,25,666.24,48.72,65.46,28.3,13.24,6.24,High
+3037,Tempeh Brown Rice + kale,dinner,vegan,25,706.34,45.4,81.06,27.94,11.62,3.72,Medium
+3038,Seitan Quinoa Bowl,dinner,vegan,22,767.7,104.97,75.35,7.28,11.12,4.74,Medium
+3039,TVP Chili Bowl,dinner,vegan,30,522.9,53.48,78.9,2.02,30.74,13.34,High
+3040,Lentil Pasta Bowl (whole wheat),dinner,vegan,28,657.64,34.08,114.68,9.32,29.38,8.4,High
+3041,Chickpea Rice Bowl + broccoli,dinner,vegan,25,787.04,30.6,139.2,13.16,22.36,13.86,Medium
+3042,Black Bean Quinoa Bowl + kale,dinner,vegan,25,666.24,34.64,110.22,12.36,30.22,5.4,High
+3043,Paneer Quinoa + peppers,dinner,vegetarian,25,874.04,39.88,61.66,50.6,9.1,11.06,Low
+3044,Egg + spinach rice bowl,dinner,non-vegetarian,18,571.94,27.1,66.13,21.98,2.64,2.19,Medium
+3045,Tofu peanut quinoa bowl,dinner,vegan,25,682.8,47.04,63.3,29.14,11.44,10.02,High
+4001,Greek Yogurt Cup,snack,vegetarian,2,118.0,20.6,7.2,0.8,0.0,7.2,Low
+4002,Skyr Cup,snack,vegetarian,2,124.0,22.0,8.0,0.4,0.0,8.0,Low
+4003,Cottage Cheese Cup,snack,vegetarian,2,164.0,22.0,6.8,2.0,0.0,5.4,Low
+4004,Protein Shake (whey + milk),snack,vegetarian,2,245.0,32.5,15.5,6.8,0.6,13.7,Low
+4005,Protein Shake (pea + soy),snack,vegan,2,196.5,30.75,7.25,6.3,3.0,1.3,Low
+4006,Apple + peanut butter,snack,vegan,3,189.04,4.98,25.68,9.32,4.92,18.26,Low
+4007,Banana + peanut butter,snack,vegan,3,230.44,6.04,35.52,9.42,4.72,18.7,Low
+4008,Carrots + hummus,snack,vegan,5,264.8,11.04,32.8,11.84,11.68,7.88,Low
+4009,Cucumber + hummus,snack,vegan,5,226.2,10.86,23.28,11.7,8.1,3.42,Low
+4010,Almonds pack (30g),snack,vegan,1,173.7,6.3,6.6,15.0,3.75,1.32,Low
+4011,Walnuts pack (25g),snack,vegan,1,163.5,3.75,3.5,16.25,1.68,0.65,Low
+4012,Cashews pack (30g),snack,vegan,1,165.9,5.4,9.0,13.2,0.99,1.77,Low
+4013,Trail Mix (nuts + seeds),snack,vegan,2,210.65,6.75,6.7,19.1,3.4,1.19,Low
+4014,Boiled eggs (2),snack,non-vegetarian,10,143.0,13.0,1.1,10.0,0.0,1.1,Low
+4015,Edamame cup,snack,vegan,6,219.6,21.42,17.82,9.36,9.36,3.96,Low
+4016,Dark chocolate (20g),snack,vegan,1,120.0,1.4,9.2,8.6,2.2,4.8,Low
+4017,Protein bar,snack,vegetarian,1,222.0,18.0,21.0,6.0,4.8,9.6,Low
+4018,Granola bar,snack,vegan,1,198.0,3.6,32.4,6.3,1.8,12.6,Low
+4019,Peanut butter rice cakes,snack,vegan,5,163.74,5.26,17.96,8.54,1.5,1.57,Low
+4020,Avocado rice cakes,snack,vegan,5,165.66,2.46,19.86,9.36,4.56,0.55,Low
+4021,Cheese + crackers,snack,vegetarian,2,239.85,13.95,16.86,13.23,2.72,2.46,Low
+4022,Turkey jerky pack,snack,non-vegetarian,1,108.5,17.5,2.8,1.4,0.0,1.05,Low
+4023,Beef jerky pack,snack,non-vegetarian,1,143.5,11.55,3.85,9.1,0.0,2.45,Low
+4024,Orange + almonds,snack,vegan,2,171.45,4.77,24.54,7.68,6.2,17.58,Low
+4025,Strawberries + skyr,snack,vegetarian,3,162.8,20.92,19.52,0.84,3.2,15.04,Low
+4026,Apple + almonds + skyr,snack,vegetarian,3,252.65,20.07,28.62,8.08,5.24,21.22,Medium
+4027,Banana + whey shake,snack,vegetarian,2,311.8,25.82,41.86,6.56,3.52,27.94,Medium
+4028,Berries + Greek yogurt,snack,vegetarian,3,177.4,19.66,24.24,1.2,3.52,18.4,Low
+4029,Cottage cheese + apple,snack,vegetarian,3,210.0,20.16,22.68,2.04,2.88,17.34,Low
+4030,Edamame + carrots,snack,vegan,6,236.2,19.94,25.84,8.52,11.12,8.22,Low
+4031,Hummus + whole wheat toast,snack,vegan,5,281.0,14.2,35.8,10.2,8.88,3.66,Medium
+4032,Peanut butter banana rice cakes,snack,vegan,5,234.94,6.14,36.2,8.78,3.58,11.33,Low
+4033,Avocado tomato rice cakes,snack,vegan,5,176.46,3.0,22.2,9.48,5.28,2.11,Low
+4034,Orange + walnuts,snack,vegan,2,182.7,3.87,23.34,9.93,5.32,17.31,Low
+4035,Protein pudding (skyr + whey + cinnamon),snack,vegetarian,3,174.07,31.84,9.51,1.27,0.83,7.82,Low
+4036,Soy yogurt-style shake,snack,vegan,2,184.1,23.81,12.41,5.94,4.1,5.12,Low
+4037,Boiled eggs + cucumber,snack,non-vegetarian,10,161.0,13.84,5.42,10.12,0.6,3.14,Low
+4038,Turkey jerky + apple,snack,non-vegetarian,2,165.8,15.42,21.72,1.48,3.36,15.46,Low
+4039,Beef jerky + orange,snack,non-vegetarian,2,198.2,11.34,22.18,7.96,3.84,17.14,Low
+4040,Protein bar + strawberries,snack,vegetarian,2,260.4,18.84,30.24,6.36,7.2,15.48,Medium
+4041,Granola + skyr mini cup,snack,vegetarian,3,210.75,19.0,22.0,5.3,1.75,12.0,Low
+4042,Dark chocolate + strawberries,snack,vegan,2,128.4,1.89,16.14,6.81,4.05,9.48,Low
+4043,Cottage cheese + pineapple,snack,vegetarian,3,197.6,20.3,19.22,1.9,1.4,14.76,Low
+4044,Greek yogurt + chia,snack,vegetarian,3,154.8,20.19,10.69,3.79,3.44,6.48,Low
+4045,Almonds + blueberries,snack,vegan,2,143.85,3.85,17.8,7.8,4.28,10.66,Low
