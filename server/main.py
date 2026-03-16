@@ -87,6 +87,8 @@ def generate_plan(req: MealPlanRequest) -> Dict[str, Any]:
             allergies=req.allergies,
             exclude_ultra_processed=req.exclude_ultra_processed,
             variety=req.variety,
+            prep_time_preference=req.prep_time_preference,
+            macro_preference=req.macro_preference,
         )
         return {"status": "ok", "plan": plan}
     except Exception as e:
@@ -104,6 +106,8 @@ def replace_single_meal(req: ReplaceMealRequest) -> Dict[str, Any]:
             allergies=req.allergies,
             exclude_ultra_processed=req.exclude_ultra_processed,
             variety=req.variety,
+            prep_time_preference=req.prep_time_preference,
+            macro_preference=req.macro_preference,
             slot=req.slot,
             target_meal_calories=req.target_meal_calories,
             exclude_recipe_ids=req.exclude_recipe_ids,

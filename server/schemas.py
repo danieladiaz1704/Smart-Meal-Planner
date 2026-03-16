@@ -5,6 +5,9 @@ from typing import List, Optional, Literal
 DietType = Literal["vegan", "vegetarian", "non-vegetarian"]
 GoalType = Literal["lose_weight", "maintain", "gain_muscle"]
 
+PrepTimePreference = Literal["any", "quick", "moderate"]
+MacroPreference = Literal["balanced", "high_protein", "high_carb", "lower_carb"]
+
 
 class MealPlanRequest(BaseModel):
     calories: int = Field(..., ge=800, le=6000)
@@ -19,6 +22,9 @@ class MealPlanRequest(BaseModel):
     exclude_ultra_processed: bool = Field(False)
     variety: bool = Field(True)
 
+    prep_time_preference: PrepTimePreference = "any"
+    macro_preference: MacroPreference = "balanced"
+
 
 class ReplaceMealRequest(BaseModel):
     # Same global constraints as planner:
@@ -29,6 +35,9 @@ class ReplaceMealRequest(BaseModel):
     allergies: List[str] = Field(default_factory=list)
     exclude_ultra_processed: bool = Field(False)
     variety: bool = Field(True)
+
+    prep_time_preference: PrepTimePreference = "any"
+    macro_preference: MacroPreference = "balanced"
 
     # What to replace:
     day: int = Field(..., ge=1, le=14)

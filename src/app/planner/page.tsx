@@ -23,6 +23,8 @@ export default function PlannerPage() {
     allergies: "",
     exclude_ultra_processed: true,
     variety: true,
+    prep_time_preference: "any" as "any" | "quick" | "moderate",
+    macro_preference: "balanced" as "balanced" | "high_protein" | "high_carb" | "lower_carb",
   });
 
   const [loading, setLoading] = useState(false);
@@ -83,6 +85,8 @@ export default function PlannerPage() {
           .filter(Boolean),
         exclude_ultra_processed: form.exclude_ultra_processed,
         variety: form.variety,
+        prep_time_preference: form.prep_time_preference,
+        macro_preference: form.macro_preference,
       };
 
       const res = await fetch(`${API_BASE}/generate-plan`, {
@@ -133,6 +137,8 @@ export default function PlannerPage() {
           .filter(Boolean),
         exclude_ultra_processed: form.exclude_ultra_processed,
         variety: form.variety,
+        prep_time_preference: form.prep_time_preference,
+        macro_preference: form.macro_preference,
         day: activeDay,
         slot,
         target_meal_calories: Number(target),
@@ -163,9 +169,11 @@ export default function PlannerPage() {
             acc.protein_g += Number(mm.protein_g || 0);
             acc.carbs_g += Number(mm.carbs_g || 0);
             acc.fat_g += Number(mm.fat_g || 0);
+            acc.fiber_g += Number(mm.fiber_g || 0);
+            acc.sugar_g += Number(mm.sugar_g || 0);
             return acc;
           },
-          { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }
+          { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0 }
         );
 
         return {
@@ -176,6 +184,8 @@ export default function PlannerPage() {
             protein_g: Number(t.protein_g.toFixed(1)),
             carbs_g: Number(t.carbs_g.toFixed(1)),
             fat_g: Number(t.fat_g.toFixed(1)),
+            fiber_g: Number(t.fiber_g.toFixed(1)),
+            sugar_g: Number(t.sugar_g.toFixed(1)),
           },
         };
       });
@@ -186,9 +196,11 @@ export default function PlannerPage() {
           acc.protein_g += Number(d.totals?.protein_g || 0);
           acc.carbs_g += Number(d.totals?.carbs_g || 0);
           acc.fat_g += Number(d.totals?.fat_g || 0);
+          acc.fiber_g += Number(d.totals?.fiber_g || 0);
+          acc.sugar_g += Number(d.totals?.sugar_g || 0);
           return acc;
         },
-        { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }
+        { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0 }
       );
 
       const ctr = new Map<string, number>();
@@ -216,6 +228,8 @@ export default function PlannerPage() {
             protein_g: Number(overall.protein_g.toFixed(1)),
             carbs_g: Number(overall.carbs_g.toFixed(1)),
             fat_g: Number(overall.fat_g.toFixed(1)),
+            fiber_g: Number(overall.fiber_g.toFixed(1)),
+            sugar_g: Number(overall.sugar_g.toFixed(1)),
           },
           shopping_list: { total_unique: shoppingItems.length, items: shoppingItems },
         },
@@ -314,6 +328,31 @@ export default function PlannerPage() {
                   placeholder="nuts, dairy"
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                 />
+              </Field>
+
+              <Field label="Prep time preference">
+                <select
+                  value={form.prep_time_preference}
+                  onChange={(e) => setForm({ ...form, prep_time_preference: e.target.value as any })}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
+                >
+                  <option value="any">Any</option>
+                  <option value="quick">Quick meals</option>
+                  <option value="moderate">Moderate</option>
+                </select>
+              </Field>
+
+              <Field label="Macro preference">
+                <select
+                  value={form.macro_preference}
+                  onChange={(e) => setForm({ ...form, macro_preference: e.target.value as any })}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
+                >
+                  <option value="balanced">Balanced</option>
+                  <option value="high_protein">High protein</option>
+                  <option value="high_carb">High carb</option>
+                  <option value="lower_carb">Lower carb</option>
+                </select>
               </Field>
             </div>
 
@@ -423,7 +462,7 @@ export default function PlannerPage() {
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
                       <p className="text-xs font-bold text-slate-700">Explainability</p>
                       <p className="text-xs text-slate-600 mt-1">
-                        Rule-Based Filtering + Goal-Aware Ranking + Machine Learning Preference Score
+                        Rule-Based Filtering + Goal-Aware Ranking + Machine Learning Preference Score + User Macro / Prep Preferences
                       </p>
                     </div>
                   </>
@@ -541,9 +580,10 @@ function MealCard({
           </p>
 
           <p className="text-sm font-extrabold text-slate-900 truncate">{meal.name}</p>
+
           <p className="text-xs text-slate-500 mt-1">
-          ⏱ Prep time: {meal.minutes} min
-        </p>
+            ⏱ Prep time: {meal.minutes} min
+          </p>
 
           {preference && (
             <div className="mt-3 flex flex-wrap gap-2">

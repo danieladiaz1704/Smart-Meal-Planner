@@ -9,6 +9,9 @@ from collections import Counter
 DietType = Literal["vegan", "vegetarian", "non-vegetarian"]
 GoalType = Literal["lose_weight", "maintain", "gain_muscle"]
 
+PrepTimePreference = Literal["any", "quick", "moderate"]
+MacroPreference = Literal["balanced", "high_protein", "high_carb", "lower_carb"]
+
 # cache in-memory
 _ING_DF: Optional[pd.DataFrame] = None
 _MEALS_DF: Optional[pd.DataFrame] = None
@@ -354,8 +357,10 @@ def generate_meal_plan(
     diet_type: DietType = "non-vegetarian",
     goal: GoalType = "maintain",
     allergies: Optional[List[str]] = None,
-    exclude_ultra_processed: bool = False,  # kept for API compatibility (unused for now)
-    variety: bool = True,  # kept for API compatibility
+    exclude_ultra_processed: bool = False,
+    variety: bool = True,
+    prep_time_preference: PrepTimePreference = "any",
+    macro_preference: MacroPreference = "balanced",
 ) -> Dict[str, Any]:
     global _MEALS_DF
     if _MEALS_DF is None:
@@ -437,9 +442,11 @@ def replace_meal(
     allergies: List[str],
     exclude_ultra_processed: bool,
     variety: bool,
-    slot: str,
-    target_meal_calories: Optional[float],
-    exclude_recipe_ids: List[int],
+    prep_time_preference: PrepTimePreference = "any",
+    macro_preference: MacroPreference = "balanced",
+    slot: str = "lunch",
+    target_meal_calories: Optional[float] = None,
+    exclude_recipe_ids: Optional[List[int]] = None,
 ) -> Dict[str, Any]:
     global _MEALS_DF
     if _MEALS_DF is None:
