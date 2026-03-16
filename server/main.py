@@ -26,7 +26,7 @@ app = FastAPI(
     version="2.0.0",
     description="FastAPI backend + custom ingredient-based meal database (ingredients_db.csv + meals_recipes.csv).",
 )
-
+saved_plans: Dict[str, list] = {}
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -115,3 +115,36 @@ def replace_single_meal(req: ReplaceMealRequest) -> Dict[str, Any]:
         return {"status": "ok", "day": req.day, "slot": req.slot, "meal": meal}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Replace meal failed: {str(e)}")
+    # -----------------------------
+# SAVE MEAL PLAN
+# -----------------------------
+@app.post("/save-plan")
+def save_plan(payload: Dict[str, Any]):
+    email = payload.get("email")
+    plan = payload.get("plan")
+
+    if not email or not plan:
+        raise HTTPException(status_code=400, detail="Missing email or plan")
+
+    if email not in saved_plans:
+        saved_plans[email] = []
+
+    saved_plans[email].append(plan)
+
+    return {
+        "status": "ok",
+        "message": "Plan saved successfully"
+    }
+
+
+# -----------------------------
+# GET SAVED PLANS
+# -----------------------------
+@app.get("/saved-plans/{email}")
+def get_saved_plans(email: str):
+    plans = saved_plans.get(email, [])
+
+    return {
+        "status": "ok",
+        "plans": plans
+    }
