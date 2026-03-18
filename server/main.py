@@ -153,3 +153,46 @@ def get_saved_plans(email: str):
         "status": "ok",
         "plans": plans
     }
+# TEMP USER STORAGE
+users_db = {}
+
+# SIGNUP API
+@app.post("/signup")
+def signup(user: dict):
+    email = user.get("email")
+    password = user.get("password")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+
+    if email in users_db:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    users_db[email] = {
+        "email": email,
+        "password": password
+    }
+
+    return {"status": "ok", "message": "User created"}
+
+# 🔐 LOGIN API
+@app.post("/login")
+def login(user: dict):
+    email = user.get("email")
+    password = user.get("password")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+
+    if email not in users_db:
+        raise HTTPException(status_code=400, detail="User not found")
+
+    if users_db[email]["password"] != password:
+        raise HTTPException(status_code=400, detail="Invalid password")
+
+    return {
+        "status": "ok",
+        "user": {
+            "email": email
+        }
+    }

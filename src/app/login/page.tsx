@@ -4,43 +4,47 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Get users from localStorage
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
+    try {
+      const res = await fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-  // Find the user by email
-  const user = users.find((u: any) => u.email === email);
+      const data = await res.json();
 
-  // If user does not exist
-  if (!user) {
-    alert("User not found. Please sign up first.");
-    return;
-  }
+      if (!res.ok) {
+        throw new Error(data?.detail || "Login failed");
+      }
 
-  // If password is incorrect
-  if (user.password !== password) {
-    alert("Incorrect password");
-    return;
-  }
+      // ✅ store user
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
 
-  // Save logged-in user session
-  localStorage.setItem("currentUser", JSON.stringify(user));
+      alert("Login successful!");
 
-  // Redirect to planner page
-  router.push("/planner");
-};
+      // redirect
+      router.push("/planner");
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 relative">
-
+      
       {/* Back Button */}
       <button
         onClick={() => router.push("/")}
@@ -101,7 +105,6 @@ const handleSubmit = (e: React.FormEvent) => {
         </p>
 
       </div>
-
     </div>
   );
 }
