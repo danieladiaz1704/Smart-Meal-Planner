@@ -100,7 +100,7 @@ export default function Landing() {
     <button
       onClick={() => {
         localStorage.removeItem("currentUser");
-        router.push("/");
+        window.location.reload();
       }}
       className="rounded-2xl px-4 py-2 bg-red-500 text-white font-bold hover:opacity-90 transition"
     >
