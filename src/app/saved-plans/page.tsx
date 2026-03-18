@@ -5,76 +5,75 @@ import { useEffect, useState } from "react";
 export default function SavedPlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
 
-  // 🔥 DELETE FUNCTION
-  const handleDelete = async (index: number) => {
+  const fetchPlans = async () => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
     if (!currentUser?.email) return;
 
-    try {
-      await fetch(
-        `http://127.0.0.1:8000/delete-plan/${currentUser.email}/${index}`,
-        { method: "DELETE" }
-      );
+    const res = await fetch(
+      `http://127.0.0.1:8000/saved-plans/${currentUser.email}`
+    );
 
-      // update UI instantly
-      setPlans((prev) => prev.filter((_, i) => i !== index));
-    } catch (err) {
-      console.error("Delete failed", err);
+    const data = await res.json();
+
+    if (data?.status === "ok") {
+      setPlans(data.plans);
     }
   };
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-
-      if (!currentUser?.email) return;
-
-      try {
-        const res = await fetch(
-          `http://127.0.0.1:8000/saved-plans/${currentUser.email}`
-        );
-
-        const data = await res.json();
-
-        if (data?.status === "ok") {
-          setPlans(data.plans);
-        }
-      } catch (err) {
-        console.error("Error fetching plans", err);
-      }
-    };
-
     fetchPlans();
   }, []);
 
+  const handleDelete = async (index: number) => {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+    await fetch("http://127.0.0.1:8000/delete-plan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: currentUser.email,
+        index,
+      }),
+    });
+
+    fetchPlans();
+  };
+
   return (
-    <div className="min-h-screen p-10 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">My Saved Meal Plans</h1>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white p-8">
+      <h1 className="text-4xl font-bold mb-8 text-green-700">
+        🥗 My Saved Meal Plans
+      </h1>
 
       {plans.length === 0 ? (
-        <p className="text-gray-600">No saved plans yet.</p>
+        <p className="text-gray-500">No saved plans yet.</p>
       ) : (
         plans.map((plan, index) => (
-          <div key={index} className="bg-white p-6 rounded-2xl shadow mb-8">
-            
-            {/* 🔥 HEADER WITH DELETE BUTTON */}
+          <div
+            key={index}
+            className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100"
+          >
+            {/* HEADER */}
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">
-                🥗 Plan #{index + 1}
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Plan #{index + 1}
               </h2>
 
               <button
                 onClick={() => handleDelete(index)}
-                className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:opacity-90"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
               >
                 Delete
               </button>
             </div>
 
+            {/* DAYS */}
             {(plan?.days || []).map((day: any, i: number) => (
-              <div key={i} className="mb-6 border-t pt-4">
-                <h3 className="text-xl font-semibold mb-3">
+              <div key={i} className="mb-6">
+                <h3 className="text-lg font-bold text-green-600 mb-3">
                   📅 Day {day.day}
                 </h3>
 
@@ -82,24 +81,23 @@ export default function SavedPlansPage() {
                   {(day.meals || []).map((meal: any, j: number) => (
                     <div
                       key={j}
-                      className="bg-gray-50 p-4 rounded-xl shadow-sm"
+                      className="bg-green-50 rounded-xl p-4 shadow-sm hover:shadow-md transition"
                     >
-                      <h4 className="font-bold text-lg mb-1">
-                        {meal.meal_type === "breakfast" && "🍳"}
-                        {meal.meal_type === "lunch" && "🍛"}
-                        {meal.meal_type === "dinner" && "🍽️"}{" "}
+                      <h4 className="font-semibold text-gray-800">
+                        {meal.meal_type === "breakfast" && "🍳 "}
+                        {meal.meal_type === "lunch" && "🍛 "}
+                        {meal.meal_type === "dinner" && "🍽️ "}
                         {meal.meal_type}
                       </h4>
 
-                      <p className="text-sm font-medium">{meal.name}</p>
-
-                      <p className="text-xs text-gray-500 mt-1">
-                        ⏱ {meal.minutes} min
+                      <p className="text-sm mt-1 font-medium">
+                        {meal.name}
                       </p>
 
-                      <div className="text-xs mt-2 text-gray-600">
+                      <div className="text-xs text-gray-500 mt-2">
                         🔥 {meal.calories} kcal <br />
-                        💪 {meal.protein_g}g protein
+                        💪 {meal.protein_g}g protein <br />
+                        ⏱ {meal.minutes} min
                       </div>
                     </div>
                   ))}

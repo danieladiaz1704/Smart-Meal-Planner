@@ -115,22 +115,25 @@ export default function PlannerPage() {
     /* ---------- STORE RESULT ---------- */
 
     setResult(data);
-    setActiveDay(1);
+setActiveDay(1);
 
-    /* ---------- SAVE PLAN FOR USER ---------- */
+/* ---------- SAVE PLAN FOR USER ---------- */
 
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-await fetch(`${API_BASE}/save-plan`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    email: currentUser?.email,
-    plan: data.plan,
-  }),
-});
+if (currentUser?.email && data?.plan) {
+  await fetch(`${API_BASE}/save-plan`,
+     {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: currentUser.email,
+      plan: data.plan,
+    }),
+  });
+}
     /* ---------- UI PROGRESS ---------- */
 
     setProgress(100);
