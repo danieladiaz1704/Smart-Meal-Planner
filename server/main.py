@@ -1,5 +1,11 @@
 from __future__ import annotations
+from pymongo import MongoClient
 
+client = MongoClient("mongodb+srv://sehgalishika14_db_user:nnVcP1KmQniBF6y8@cluster0.nbrnb3c.mongodb.net/?appName=Cluster0")
+
+db = client["meal_planner_db"]
+
+users_collection = db["users"]
 import os
 from typing import Any, Dict
 
@@ -165,17 +171,20 @@ def signup(user: dict):
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
-    if email in users_db:
+    # 🔥 check if user exists in MongoDB
+    existing_user = users_collection.find_one({"email": email})
+
+    if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    users_db[email] = {
+    # 🔥 insert into MongoDB
+    users_collection.insert_one({
         "email": email,
         "password": password
-    }
+    })
 
     return {"status": "ok", "message": "User created"}
-
-# 🔐 LOGIN API
+# LOGIN API
 @app.post("/login")
 def login(user: dict):
     email = user.get("email")
@@ -184,15 +193,19 @@ def login(user: dict):
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
-    if email not in users_db:
+    # 🔥 find user in MongoDB
+    existing_user = users_collection.find_one({"email": email})
+
+    if not existing_user:
         raise HTTPException(status_code=400, detail="User not found")
 
-    if users_db[email]["password"] != password:
-        raise HTTPException(status_code=400, detail="Invalid password")
+    # 🔥 check password
+    if existing_user["password"] != password:
+        raise HTTPException(status_code=400, detail="Incorrect password")
 
     return {
         "status": "ok",
         "user": {
-            "email": email
+            "email": existing_user["email"]
         }
     }

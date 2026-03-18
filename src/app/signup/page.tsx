@@ -10,7 +10,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -18,33 +18,30 @@ export default function SignupPage() {
       return;
     }
 
-    // Get existing users from localStorage
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    try {
+      const res = await fetch("http://127.0.0.1:8000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    // Check if user already exists
-    const existingUser = users.find((u: any) => u.email === email);
+      const data = await res.json();
 
-    if (existingUser) {
-      alert("User already exists. Please login.");
-      return;
+      if (!res.ok) {
+        throw new Error(data?.detail || "Signup failed");
+      }
+
+      alert("Account created successfully! Please login.");
+
+      router.push("/login");
+    } catch (err: any) {
+      alert(err.message);
     }
-
-    // Create new user object
-    const newUser = {
-      email: email,
-      password: password,
-      meals: []
-    };
-
-    // Add new user to the users list
-    users.push(newUser);
-
-    // Save updated users list
-    localStorage.setItem("users", JSON.stringify(users));
-
-    alert("Account created successfully!");
-
-    router.push("/login");
   };
 
   return (
