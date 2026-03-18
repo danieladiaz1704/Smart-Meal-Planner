@@ -36,22 +36,48 @@ export default function SavedPlansPage() {
       {plans.length === 0 ? (
         <p className="text-gray-600">No saved plans yet.</p>
       ) : (
-        <div className="space-y-6">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className="bg-white shadow-md rounded-xl p-6 border"
-            >
-              <h2 className="text-xl font-semibold mb-3">
-                Saved Plan #{index + 1}
-              </h2>
+        plans.map((plan, index) => (
+          <div key={index} className="bg-white p-6 rounded-2xl shadow mb-8">
+            <h2 className="text-2xl font-bold mb-4">
+              🥗 Plan #{index + 1}
+            </h2>
 
-              <pre className="text-sm bg-gray-50 p-4 rounded-lg overflow-x-auto">
-                {JSON.stringify(plan, null, 2)}
-              </pre>
-            </div>
-          ))}
-        </div>
+            {(plan?.days || []).map((day: any, i: number) => (
+              <div key={i} className="mb-6 border-t pt-4">
+                <h3 className="text-xl font-semibold mb-3">
+                  📅 Day {day.day}
+                </h3>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  {(day.meals || []).map((meal: any, j: number) => (
+                    <div
+                      key={j}
+                      className="bg-gray-50 p-4 rounded-xl shadow-sm"
+                    >
+                      <h4 className="font-bold text-lg mb-1">
+                        {meal.meal_type === "breakfast" && "🍳"}
+                        {meal.meal_type === "lunch" && "🍛"}
+                        {meal.meal_type === "dinner" && "🍽️"}{" "}
+                        {meal.meal_type}
+                      </h4>
+
+                      <p className="text-sm font-medium">{meal.name}</p>
+
+                      <p className="text-xs text-gray-500 mt-1">
+                        ⏱ {meal.minutes} min
+                      </p>
+
+                      <div className="text-xs mt-2 text-gray-600">
+                        🔥 {meal.calories} kcal <br />
+                        💪 {meal.protein_g}g protein
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))
       )}
     </div>
   );
