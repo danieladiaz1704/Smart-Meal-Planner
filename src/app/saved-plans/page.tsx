@@ -5,6 +5,25 @@ import { useEffect, useState } from "react";
 export default function SavedPlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
 
+  // 🔥 DELETE FUNCTION
+  const handleDelete = async (index: number) => {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+    if (!currentUser?.email) return;
+
+    try {
+      await fetch(
+        `http://127.0.0.1:8000/delete-plan/${currentUser.email}/${index}`,
+        { method: "DELETE" }
+      );
+
+      // update UI instantly
+      setPlans((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
+
   useEffect(() => {
     const fetchPlans = async () => {
       const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
@@ -38,9 +57,20 @@ export default function SavedPlansPage() {
       ) : (
         plans.map((plan, index) => (
           <div key={index} className="bg-white p-6 rounded-2xl shadow mb-8">
-            <h2 className="text-2xl font-bold mb-4">
-              🥗 Plan #{index + 1}
-            </h2>
+            
+            {/* 🔥 HEADER WITH DELETE BUTTON */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">
+                🥗 Plan #{index + 1}
+              </h2>
+
+              <button
+                onClick={() => handleDelete(index)}
+                className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:opacity-90"
+              >
+                Delete
+              </button>
+            </div>
 
             {(plan?.days || []).map((day: any, i: number) => (
               <div key={i} className="mb-6 border-t pt-4">
