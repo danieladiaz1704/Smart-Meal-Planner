@@ -19,7 +19,12 @@ from schemas import MealPlanRequest, ReplaceMealRequest
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
 
-ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001"
+]
 
 app = FastAPI(
     title="Smart Meal Planner API",

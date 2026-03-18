@@ -109,6 +109,9 @@ export default function PlannerPage() {
     if (!res.ok) throw new Error(data?.detail ?? data?.message ?? "Backend error");
     if (data?.status !== "ok") throw new Error(data?.message ?? "Unable to generate plan");
 
+    
+    
+
     /* ---------- STORE RESULT ---------- */
 
     setResult(data);
@@ -118,18 +121,16 @@ export default function PlannerPage() {
 
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-    if (currentUser?.email && data?.plan) {
-      const savedPlans = JSON.parse(localStorage.getItem("savedPlans") || "{}");
-
-      if (!savedPlans[currentUser.email]) {
-        savedPlans[currentUser.email] = [];
-      }
-
-      savedPlans[currentUser.email].push(data.plan);
-
-      localStorage.setItem("savedPlans", JSON.stringify(savedPlans));
-    }
-
+await fetch(`${API_BASE}/save-plan`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    email: currentUser?.email,
+    plan: data.plan,
+  }),
+});
     /* ---------- UI PROGRESS ---------- */
 
     setProgress(100);

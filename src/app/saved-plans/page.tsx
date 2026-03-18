@@ -6,12 +6,27 @@ export default function SavedPlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
 
   useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-    const savedPlans = JSON.parse(localStorage.getItem("savedPlans") || "{}");
+    const fetchPlans = async () => {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-    if (currentUser?.email && savedPlans[currentUser.email]) {
-      setPlans(savedPlans[currentUser.email]);
-    }
+      if (!currentUser?.email) return;
+
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/saved-plans/${currentUser.email}`
+        );
+
+        const data = await res.json();
+
+        if (data?.status === "ok") {
+          setPlans(data.plans);
+        }
+      } catch (err) {
+        console.error("Error fetching plans", err);
+      }
+    };
+
+    fetchPlans();
   }, []);
 
   return (
