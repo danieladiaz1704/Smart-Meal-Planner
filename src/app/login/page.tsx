@@ -8,9 +8,13 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // 🔥 NEW
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setLoading(true); // 🔥 start loading
 
     try {
       const res = await fetch("http://127.0.0.1:8000/login", {
@@ -30,15 +34,17 @@ export default function LoginPage() {
         throw new Error(data?.detail || "Login failed");
       }
 
-      // ✅ store user
       localStorage.setItem("currentUser", JSON.stringify(data.user));
 
-      alert("Login successful!");
+      // 👉 small delay = smoother UX
+      setTimeout(() => {
+        router.push("/planner");
+      }, 500);
 
-      // redirect
-      router.push("/planner");
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false); // 🔥 stop loading
     }
   };
 
@@ -85,12 +91,25 @@ export default function LoginPage() {
             Forgot password?
           </p>
 
+          {/* 🔥 UPDATED BUTTON */}
           <button
             type="submit"
-            className="mt-2 bg-gradient-to-r from-red-500 to-orange-500 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition duration-200"
+            disabled={loading}
+            className={`mt-2 py-2 rounded-lg font-semibold transition duration-200 text-white
+              ${loading 
+                ? "bg-gray-400 cursor-not-allowed" 
+                : "bg-gradient-to-r from-red-500 to-orange-500 hover:opacity-90"
+              }`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
+
+          {/* 🔥 EXTRA UX */}
+          {loading && (
+            <p className="text-sm text-gray-500 text-center mt-1">
+              Please wait...
+            </p>
+          )}
 
         </form>
 
@@ -105,6 +124,25 @@ export default function LoginPage() {
         </p>
 
       </div>
+
+      {/* 🔥 ERROR POPUP */}
+      {error && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-80 text-center">
+            <p className="text-red-500 font-semibold mb-4">
+              {error}
+            </p>
+
+            <button
+              onClick={() => setError("")}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

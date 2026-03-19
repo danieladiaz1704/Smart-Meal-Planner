@@ -19,7 +19,9 @@ from schemas import MealPlanRequest, ReplaceMealRequest
 # -----------------------------
 # MONGODB CONNECTION
 # -----------------------------
-client = MongoClient("mongodb+srv://sehgalishika14_db_user:nnVcP1KmQniBF6y8@cluster0.nbrnb3c.mongodb.net/?appName=Cluster0")
+cclient = MongoClient(
+    "mongodb+srv://sehgalishika14_db_user:nnVcP1KmQniBF6y8@cluster0.nbrnb3c.mongodb.net/meal_planner_db?retryWrites=true&w=majority"
+)
 
 db = client["meal_planner_db"]
 
