@@ -6,18 +6,19 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const router = useRouter();
 
+  const API_BASE = "http://192.168.2.156:8000";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // 🔥 NEW
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setLoading(true); // 🔥 start loading
+    setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
+      const res = await fetch(`${API_BASE}/login`, { // ✅ FIXED
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,7 +37,6 @@ export default function LoginPage() {
 
       localStorage.setItem("currentUser", JSON.stringify(data.user));
 
-      // 👉 small delay = smoother UX
       setTimeout(() => {
         router.push("/planner");
       }, 500);
@@ -44,14 +44,13 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false); // 🔥 stop loading
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 relative">
       
-      {/* Back Button */}
       <button
         onClick={() => router.push("/")}
         className="absolute top-6 left-6 text-gray-700 hover:text-black font-medium"
@@ -91,7 +90,6 @@ export default function LoginPage() {
             Forgot password?
           </p>
 
-          {/* 🔥 UPDATED BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -104,7 +102,6 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* 🔥 EXTRA UX */}
           {loading && (
             <p className="text-sm text-gray-500 text-center mt-1">
               Please wait...
@@ -125,7 +122,6 @@ export default function LoginPage() {
 
       </div>
 
-      {/* 🔥 ERROR POPUP */}
       {error && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-80 text-center">

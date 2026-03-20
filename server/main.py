@@ -19,8 +19,9 @@ from schemas import MealPlanRequest, ReplaceMealRequest
 # -----------------------------
 # MONGODB CONNECTION
 # -----------------------------
-cclient = MongoClient(
-    "mongodb+srv://sehgalishika14_db_user:nnVcP1KmQniBF6y8@cluster0.nbrnb3c.mongodb.net/meal_planner_db?retryWrites=true&w=majority"
+client = MongoClient(
+    "mongodb+srv://sehgalishika14_db_user:nnVcP1KmQniBF6y8@cluster0.nbrnb3c.mongodb.net/meal_planner_db?retryWrites=true&w=majority",
+    serverSelectionTimeoutMS=5000
 )
 
 db = client["meal_planner_db"]
@@ -160,23 +161,34 @@ def signup(user: dict):
 # -----------------------------
 @app.post("/login")
 def login(user: dict):
+    print("🔥 Login API called")
+
     email = user.get("email")
     password = user.get("password")
 
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
-    existing_user = users_collection.find_one({"email": email})
+    try:
+        # 🔍 check user in MongoDB
+        existing_user = users_collection.find_one({"email": email})
+        print("👉 User found:", existing_user)
+
+    except Exception as e:
+        print("❌ MongoDB ERROR:", str(e))
+        raise HTTPException(status_code=500, detail="Database connection error")
 
     if not existing_user:
         raise HTTPException(status_code=400, detail="User not found")
 
-    if existing_user["password"] != password:
+    if existing_user.get("password") != password:
         raise HTTPException(status_code=400, detail="Incorrect password")
 
     return {
         "status": "ok",
-        "user": {"email": email}
+        "user": {
+            "email": existing_user["email"]
+        }
     }
 
 # -----------------------------
