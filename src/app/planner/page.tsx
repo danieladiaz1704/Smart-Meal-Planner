@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000";
+const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
 const REQUEST_TIMEOUT_MS = 15000;
 
 type PlanAPIResponse =
@@ -20,7 +20,7 @@ export default function PlannerPage() {
     if (!currentUser) {
       router.push("/login");
     }
-  }, []);
+  }, [router]);
 
   const [form, setForm] = useState({
     calories: 1800,
@@ -32,7 +32,11 @@ export default function PlannerPage() {
     exclude_ultra_processed: true,
     variety: true,
     prep_time_preference: "any" as "any" | "quick" | "moderate",
-    macro_preference: "balanced" as "balanced" | "high_protein" | "high_carb" | "lower_carb",
+    macro_preference: "balanced" as
+      | "balanced"
+      | "high_protein"
+      | "high_carb"
+      | "lower_carb",
   });
 
   const [loading, setLoading] = useState(false);
@@ -45,7 +49,10 @@ export default function PlannerPage() {
 
   const days = result?.plan?.days ?? [];
   const activeDayObj = useMemo(
-    () => (Array.isArray(days) ? days.find((d: any) => d.day === activeDay) ?? days[0] : null),
+    () =>
+      Array.isArray(days)
+        ? days.find((d: any) => d.day === activeDay) ?? days[0]
+        : null,
     [days, activeDay]
   );
 
@@ -68,94 +75,112 @@ export default function PlannerPage() {
     return () => abortRef.current?.abort();
   }, []);
 
- const handleGenerate = async () => {
-  if (loading) return;
+  const handleGenerate = async () => {
+    if (loading) return;
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  abortRef.current?.abort();
-  const controller = new AbortController();
-  abortRef.current = controller;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  try {
-    const payload = {
-      calories: Number(form.calories),
-      meals_per_day: Number(form.meals_per_day),
-      days: Number(form.days),
-      diet_type: form.diet_type,
-      goal: form.goal,
-      allergies: form.allergies
-        .split(",")
-        .map((a) => a.trim())
-        .filter(Boolean),
-      exclude_ultra_processed: form.exclude_ultra_processed,
-      variety: form.variety,
-      prep_time_preference: form.prep_time_preference,
-      macro_preference: form.macro_preference,
-    };
+    try {
+      const payload = {
+        calories: Number(form.calories),
+        meals_per_day: Number(form.meals_per_day),
+        days: Number(form.days),
+        diet_type: form.diet_type,
+        goal: form.goal,
+        allergies: form.allergies
+          .split(",")
+          .map((a) => a.trim())
+          .filter(Boolean),
+        exclude_ultra_processed: form.exclude_ultra_processed,
+        variety: form.variety,
+        prep_time_preference: form.prep_time_preference,
+        macro_preference: form.macro_preference,
+      };
 
-    const res = await fetch(`${API_BASE}/generate-plan`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+      const res = await fetch(`${API_BASE}/generate-plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
 
-    const data = (await res.json()) as any;
+      const data = (await res.json()) as any;
 
-    if (!res.ok) throw new Error(data?.detail ?? data?.message ?? "Backend error");
-    if (data?.status !== "ok") throw new Error(data?.message ?? "Unable to generate plan");
+      if (!res.ok) {
+        throw new Error(data?.detail ?? data?.message ?? "Backend error");
+      }
 
-    
-    
+      if (data?.status !== "ok") {
+        throw new Error(data?.message ?? "Unable to generate plan");
+      }
 
-    /* ---------- STORE RESULT ---------- */
+      setResult(data);
+      setActiveDay(1);
 
-    setResult(data);
-setActiveDay(1);
+      setProgress(100);
+      setTimeout(() => setProgress(0), 400);
+    } catch (e: any) {
+      const msg =
+        e?.name === "AbortError"
+          ? "Request timed out. Try again (or your backend is slow / stuck)."
+          : e?.message ?? "Unknown error";
 
-/* ---------- SAVE PLAN FOR USER ---------- */
+      setResult(null);
+      setError(msg);
+      setProgress(0);
+    } finally {
+      clearTimeout(timeout);
+      setLoading(false);
+    }
+  };
 
-const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const handleSavePlan = async () => {
+    try {
+      const currentUser = JSON.parse(
+        localStorage.getItem("currentUser") || "{}"
+      );
 
-if (currentUser?.email && data?.plan) {
-  await fetch(`${API_BASE}/save-plan`,
-     {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: currentUser.email,
-      plan: data.plan,
-    }),
-  });
-}
-    /* ---------- UI PROGRESS ---------- */
+      if (!currentUser?.email || !result?.plan) {
+        alert("No plan to save");
+        return;
+      }
 
-    setProgress(100);
-    setTimeout(() => setProgress(0), 400);
+      const res = await fetch(`${API_BASE}/save-plan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          plan: result.plan,
+        }),
+      });
 
-  } catch (e: any) {
-    const msg =
-      e?.name === "AbortError"
-        ? "Request timed out. Try again (or your backend is slow / stuck)."
-        : e?.message ?? "Unknown error";
+      const data = await res.json();
 
-    setResult(null);
-    setError(msg);
-    setProgress(0);
+      if (!res.ok || data?.status !== "ok") {
+        throw new Error(data?.detail || "Failed to save plan");
+      }
 
-  } finally {
-    clearTimeout(timeout);
-    setLoading(false);
-  }
-};
+      
+    } catch (error) {
+      console.error(error);
+      
+    }
+  };
 
-  const handleReplace = async (slot: string, target: number, excludeIds: number[]) => {
+  const handleReplace = async (
+    slot: string,
+    target: number,
+    excludeIds: number[]
+  ) => {
     if (!result?.plan) return;
 
     setError(null);
@@ -187,7 +212,10 @@ if (currentUser?.email && data?.plan) {
       });
 
       const data = await res.json();
-      if (!res.ok || data?.status !== "ok") throw new Error(data?.detail ?? "Replace failed");
+
+      if (!res.ok || data?.status !== "ok") {
+        throw new Error(data?.detail ?? "Replace failed");
+      }
 
       const newMeal = data.meal;
 
@@ -208,7 +236,14 @@ if (currentUser?.email && data?.plan) {
             acc.sugar_g += Number(mm.sugar_g || 0);
             return acc;
           },
-          { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0 }
+          {
+            calories: 0,
+            protein_g: 0,
+            carbs_g: 0,
+            fat_g: 0,
+            fiber_g: 0,
+            sugar_g: 0,
+          }
         );
 
         return {
@@ -235,10 +270,18 @@ if (currentUser?.email && data?.plan) {
           acc.sugar_g += Number(d.totals?.sugar_g || 0);
           return acc;
         },
-        { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0 }
+        {
+          calories: 0,
+          protein_g: 0,
+          carbs_g: 0,
+          fat_g: 0,
+          fiber_g: 0,
+          sugar_g: 0,
+        }
       );
 
       const ctr = new Map<string, number>();
+
       for (const d of newDays) {
         for (const mm of d.meals ?? []) {
           for (const ing of mm.ingredients ?? []) {
@@ -266,7 +309,10 @@ if (currentUser?.email && data?.plan) {
             fiber_g: Number(overall.fiber_g.toFixed(1)),
             sugar_g: Number(overall.sugar_g.toFixed(1)),
           },
-          shopping_list: { total_unique: shoppingItems.length, items: shoppingItems },
+          shopping_list: {
+            total_unique: shoppingItems.length,
+            items: shoppingItems,
+          },
         },
       };
 
@@ -291,7 +337,9 @@ if (currentUser?.email && data?.plan) {
 
           <div className="hidden sm:flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-4 py-2 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-rose-500" />
-            <p className="text-sm font-semibold text-rose-700">Smart Meal Planner</p>
+            <p className="text-sm font-semibold text-rose-700">
+              Smart Meal Planner
+            </p>
           </div>
         </div>
 
@@ -300,7 +348,8 @@ if (currentUser?.email && data?.plan) {
             <div className="space-y-2">
               <h1 className="text-2xl font-extrabold">Generate your plan</h1>
               <p className="text-sm text-slate-600">
-                Set your goal, calories, diet, and constraints — we’ll build a structured plan you can follow.
+                Set your goal, calories, diet, and constraints — we’ll build a
+                structured plan you can follow.
               </p>
             </div>
 
@@ -309,7 +358,9 @@ if (currentUser?.email && data?.plan) {
                 <input
                   type="number"
                   value={form.calories}
-                  onChange={(e) => setForm({ ...form, calories: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setForm({ ...form, calories: Number(e.target.value) })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                 />
               </Field>
@@ -318,7 +369,9 @@ if (currentUser?.email && data?.plan) {
                 <input
                   type="number"
                   value={form.meals_per_day}
-                  onChange={(e) => setForm({ ...form, meals_per_day: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setForm({ ...form, meals_per_day: Number(e.target.value) })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                 />
               </Field>
@@ -327,7 +380,9 @@ if (currentUser?.email && data?.plan) {
                 <input
                   type="number"
                   value={form.days}
-                  onChange={(e) => setForm({ ...form, days: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setForm({ ...form, days: Number(e.target.value) })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                 />
               </Field>
@@ -335,7 +390,9 @@ if (currentUser?.email && data?.plan) {
               <Field label="Diet type">
                 <select
                   value={form.diet_type}
-                  onChange={(e) => setForm({ ...form, diet_type: e.target.value as any })}
+                  onChange={(e) =>
+                    setForm({ ...form, diet_type: e.target.value as any })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
                 >
                   <option value="vegetarian">Vegetarian</option>
@@ -346,7 +403,9 @@ if (currentUser?.email && data?.plan) {
               <Field label="Goal">
                 <select
                   value={form.goal}
-                  onChange={(e) => setForm({ ...form, goal: e.target.value as any })}
+                  onChange={(e) =>
+                    setForm({ ...form, goal: e.target.value as any })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
                 >
                   <option value="lose_weight">Lose weight</option>
@@ -359,7 +418,9 @@ if (currentUser?.email && data?.plan) {
                 <input
                   type="text"
                   value={form.allergies}
-                  onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, allergies: e.target.value })
+                  }
                   placeholder="nuts, dairy"
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                 />
@@ -368,7 +429,12 @@ if (currentUser?.email && data?.plan) {
               <Field label="Prep time preference">
                 <select
                   value={form.prep_time_preference}
-                  onChange={(e) => setForm({ ...form, prep_time_preference: e.target.value as any })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      prep_time_preference: e.target.value as any,
+                    })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
                 >
                   <option value="any">Any</option>
@@ -380,7 +446,9 @@ if (currentUser?.email && data?.plan) {
               <Field label="Macro preference">
                 <select
                   value={form.macro_preference}
-                  onChange={(e) => setForm({ ...form, macro_preference: e.target.value as any })}
+                  onChange={(e) =>
+                    setForm({ ...form, macro_preference: e.target.value as any })
+                  }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
                 >
                   <option value="balanced">Balanced</option>
@@ -396,7 +464,12 @@ if (currentUser?.email && data?.plan) {
                 <input
                   type="checkbox"
                   checked={form.exclude_ultra_processed}
-                  onChange={(e) => setForm({ ...form, exclude_ultra_processed: e.target.checked })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      exclude_ultra_processed: e.target.checked,
+                    })
+                  }
                 />
                 Exclude ultra-processed
               </label>
@@ -405,7 +478,9 @@ if (currentUser?.email && data?.plan) {
                 <input
                   type="checkbox"
                   checked={form.variety}
-                  onChange={(e) => setForm({ ...form, variety: e.target.checked })}
+                  onChange={(e) =>
+                    setForm({ ...form, variety: e.target.checked })
+                  }
                 />
                 Variety mode
               </label>
@@ -424,7 +499,8 @@ if (currentUser?.email && data?.plan) {
                   />
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Filtering constraints → ranking recipes → composing meals → calculating macros
+                  Filtering constraints → ranking recipes → composing meals →
+                  calculating macros
                 </p>
               </div>
             )}
@@ -448,10 +524,25 @@ if (currentUser?.email && data?.plan) {
             <div className="rounded-3xl border border-slate-200 bg-white/85 backdrop-blur shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500">Today snapshot</p>
+                  <p className="text-xs font-semibold text-slate-500">
+                    Today snapshot
+                  </p>
                   <h2 className="text-2xl font-extrabold">
-                    {activeDayObj ? `Day ${activeDayObj.day} • ${activeDayObj.totals?.calories ?? 0} kcal` : "No plan yet"}
+                    {activeDayObj
+                      ? `Day ${activeDayObj.day} • ${
+                          activeDayObj.totals?.calories ?? 0
+                        } kcal`
+                      : "No plan yet"}
                   </h2>
+
+                  {result?.plan && (
+                    <button
+                      onClick={handleSavePlan}
+                      className="mt-3 px-5 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition"
+                    >
+                       Save Plan
+                    </button>
+                  )}
                 </div>
 
                 {days.length > 0 && (
@@ -489,15 +580,28 @@ if (currentUser?.email && data?.plan) {
                     ))}
 
                     <div className="grid sm:grid-cols-3 gap-3 pt-2">
-                      <Stat title="Protein" value={`${activeDayObj.totals?.protein_g ?? 0} g`} />
-                      <Stat title="Carbs" value={`${activeDayObj.totals?.carbs_g ?? 0} g`} />
-                      <Stat title="Fat" value={`${activeDayObj.totals?.fat_g ?? 0} g`} />
+                      <Stat
+                        title="Protein"
+                        value={`${activeDayObj.totals?.protein_g ?? 0} g`}
+                      />
+                      <Stat
+                        title="Carbs"
+                        value={`${activeDayObj.totals?.carbs_g ?? 0} g`}
+                      />
+                      <Stat
+                        title="Fat"
+                        value={`${activeDayObj.totals?.fat_g ?? 0} g`}
+                      />
                     </div>
 
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs font-bold text-slate-700">Explainability</p>
+                      <p className="text-xs font-bold text-slate-700">
+                        Explainability
+                      </p>
                       <p className="text-xs text-slate-600 mt-1">
-                        Rule-Based Filtering + Goal-Aware Ranking + Machine Learning Preference Score + User Macro / Prep Preferences
+                        Rule-Based Filtering + Goal-Aware Ranking + Machine
+                        Learning Preference Score + User Macro / Prep
+                        Preferences
                       </p>
                     </div>
                   </>
@@ -507,10 +611,22 @@ if (currentUser?.email && data?.plan) {
 
             {result?.plan?.overall_totals && (
               <div className="grid sm:grid-cols-4 gap-3 mt-4">
-                <Stat title="Plan calories" value={`${result.plan.overall_totals.calories} kcal`} />
-                <Stat title="Protein" value={`${result.plan.overall_totals.protein_g} g`} />
-                <Stat title="Carbs" value={`${result.plan.overall_totals.carbs_g} g`} />
-                <Stat title="Fat" value={`${result.plan.overall_totals.fat_g} g`} />
+                <Stat
+                  title="Plan calories"
+                  value={`${result.plan.overall_totals.calories} kcal`}
+                />
+                <Stat
+                  title="Protein"
+                  value={`${result.plan.overall_totals.protein_g} g`}
+                />
+                <Stat
+                  title="Carbs"
+                  value={`${result.plan.overall_totals.carbs_g} g`}
+                />
+                <Stat
+                  title="Fat"
+                  value={`${result.plan.overall_totals.fat_g} g`}
+                />
               </div>
             )}
 
@@ -518,9 +634,12 @@ if (currentUser?.email && data?.plan) {
               <div className="mt-4 rounded-3xl border border-slate-200 bg-white/85 backdrop-blur shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-100 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-bold text-slate-600">Shopping list</p>
+                    <p className="text-xs font-bold text-slate-600">
+                      Shopping list
+                    </p>
                     <p className="text-sm text-slate-500">
-                      {result.plan.shopping_list.total_unique} unique ingredients
+                      {result.plan.shopping_list.total_unique} unique
+                      ingredients
                     </p>
                   </div>
 
@@ -538,12 +657,17 @@ if (currentUser?.email && data?.plan) {
                 </div>
 
                 <div className="p-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {result.plan.shopping_list.items.slice(0, 24).map((it: any) => (
-                    <div key={it.ingredient} className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm">
-                      <span className="font-semibold">{it.ingredient}</span>
-                      <span className="text-slate-500"> ×{it.count}</span>
-                    </div>
-                  ))}
+                  {result.plan.shopping_list.items
+                    .slice(0, 24)
+                    .map((it: any) => (
+                      <div
+                        key={it.ingredient}
+                        className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                      >
+                        <span className="font-semibold">{it.ingredient}</span>
+                        <span className="text-slate-500"> ×{it.count}</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             ) : null}
@@ -554,7 +678,13 @@ if (currentUser?.email && data?.plan) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1">
       <p className="text-xs font-bold text-slate-600">{label}</p>
@@ -592,10 +722,14 @@ function MealCard({
   index: number;
   onReplace: (slot: string, target: number, excludeIds: number[]) => void;
 }) {
-  const title = meal.slot && meal.slot !== meal.meal_type ? `${meal.meal_type} (${meal.slot})` : meal.meal_type;
+  const title =
+    meal.slot && meal.slot !== meal.meal_type
+      ? `${meal.meal_type} (${meal.slot})`
+      : meal.meal_type;
 
   const preference = meal.predicted_preference;
-  const score = typeof meal.preference_score === "number" ? meal.preference_score : null;
+  const score =
+    typeof meal.preference_score === "number" ? meal.preference_score : null;
 
   const preferenceBadgeClass =
     preference === "High"
@@ -614,7 +748,9 @@ function MealCard({
             Meal {index} • {title}
           </p>
 
-          <p className="text-sm font-extrabold text-slate-900 truncate">{meal.name}</p>
+          <p className="text-sm font-extrabold text-slate-900 truncate">
+            {meal.name}
+          </p>
 
           <p className="text-xs text-slate-500 mt-1">
             ⏱ Prep time: {meal.minutes} min
@@ -646,8 +782,12 @@ function MealCard({
             <Tag label={`P ${meal.protein_g}g`} />
             <Tag label={`C ${meal.carbs_g}g`} />
             <Tag label={`F ${meal.fat_g}g`} />
-            {meal.fiber_g !== undefined && <Tag label={`Fiber ${meal.fiber_g}g`} />}
-            {meal.sugar_g !== undefined && <Tag label={`Sugar ${meal.sugar_g}g`} />}
+            {meal.fiber_g !== undefined && (
+              <Tag label={`Fiber ${meal.fiber_g}g`} />
+            )}
+            {meal.sugar_g !== undefined && (
+              <Tag label={`Sugar ${meal.sugar_g}g`} />
+            )}
           </div>
 
           <p className="text-xs text-slate-600 mt-2 line-clamp-2">
@@ -662,7 +802,8 @@ function MealCard({
                 <li>• Calorie delta: {meal.explain.calorie_delta} kcal vs target</li>
                 <li>• Protein: {meal.explain.protein_g}g (goal-weighted)</li>
                 <li>
-                  • Sugar: {meal.explain.sugar_g}g • Sodium: {meal.explain.sodium_mg}mg • Sat fat:{" "}
+                  • Sugar: {meal.explain.sugar_g}g • Sodium:{" "}
+                  {meal.explain.sodium_mg}mg • Sat fat:{" "}
                   {meal.explain.sat_fat_g}g
                 </li>
                 <li>• Variety penalty: {meal.explain.variety_penalty}</li>
@@ -672,12 +813,20 @@ function MealCard({
         </div>
 
         <div className="shrink-0 text-right">
-          <p className="text-sm font-extrabold text-slate-900">{meal.calories} kcal</p>
-          <p className="text-xs text-slate-500 mt-1">Target {meal.target_calories} kcal</p>
+          <p className="text-sm font-extrabold text-slate-900">
+            {meal.calories} kcal
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Target {meal.target_calories} kcal
+          </p>
 
           <button
             onClick={() =>
-              onReplace(meal.slot ?? meal.meal_type, Number(meal.target_calories), [Number(meal.recipe_id)])
+              onReplace(
+                meal.slot ?? meal.meal_type,
+                Number(meal.target_calories),
+                [Number(meal.recipe_id)]
+              )
             }
             className="mt-3 rounded-2xl px-4 py-2 border border-slate-200 bg-white font-bold hover:border-rose-200 transition text-sm"
           >

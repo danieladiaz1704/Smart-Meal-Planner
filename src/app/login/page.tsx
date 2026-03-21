@@ -14,11 +14,17 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Please fill all fields");
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/login`, { // ✅ FIXED
+      const res = await fetch(`${API_BASE}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,13 +42,9 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("currentUser", JSON.stringify(data.user));
-
-      setTimeout(() => {
-        router.push("/planner");
-      }, 500);
-
+      router.push("/planner");
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 relative">
-      
       <button
         onClick={() => router.push("/")}
         className="absolute top-6 left-6 text-gray-700 hover:text-black font-medium"
@@ -59,7 +60,6 @@ export default function LoginPage() {
       </button>
 
       <div className="bg-white p-10 rounded-2xl shadow-xl w-[380px] border border-gray-100">
-
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           Smart Meal Planner Login
         </h2>
@@ -69,12 +69,11 @@ export default function LoginPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
           <input
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e)=>setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
           />
 
@@ -82,7 +81,7 @@ export default function LoginPage() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e)=>setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
           />
 
@@ -93,11 +92,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`mt-2 py-2 rounded-lg font-semibold transition duration-200 text-white
-              ${loading 
-                ? "bg-gray-400 cursor-not-allowed" 
+            className={`mt-2 py-2 rounded-lg font-semibold transition duration-200 text-white ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
                 : "bg-gradient-to-r from-red-500 to-orange-500 hover:opacity-90"
-              }`}
+            }`}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -107,7 +106,6 @@ export default function LoginPage() {
               Please wait...
             </p>
           )}
-
         </form>
 
         <p className="text-sm text-gray-600 text-center mt-4">
@@ -119,15 +117,12 @@ export default function LoginPage() {
             Sign up
           </span>
         </p>
-
       </div>
 
       {error && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-80 text-center">
-            <p className="text-red-500 font-semibold mb-4">
-              {error}
-            </p>
+            <p className="text-red-500 font-semibold mb-4">{error}</p>
 
             <button
               onClick={() => setError("")}
@@ -138,7 +133,6 @@ export default function LoginPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

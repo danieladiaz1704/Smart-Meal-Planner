@@ -3,21 +3,27 @@
 import { useEffect, useState } from "react";
 
 export default function SavedPlansPage() {
+  const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
+
   const [plans, setPlans] = useState<any[]>([]);
 
   const fetchPlans = async () => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-    if (!currentUser?.email) return;
+      if (!currentUser?.email) return;
 
-    const res = await fetch(
-      `http://127.0.0.1:8000/saved-plans/${currentUser.email}`
-    );
+      const res = await fetch(
+        `${API_BASE}/saved-plans/${currentUser.email}`
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data?.status === "ok") {
-      setPlans(data.plans);
+      if (data?.status === "ok") {
+        setPlans(data.plans);
+      }
+    } catch (error) {
+      console.error("Failed to fetch saved plans:", error);
     }
   };
 
@@ -26,20 +32,30 @@ export default function SavedPlansPage() {
   }, []);
 
   const handleDelete = async (index: number) => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-    await fetch("http://127.0.0.1:8000/delete-plan", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: currentUser.email,
-        index,
-      }),
-    });
+      if (!currentUser?.email) return;
 
-    fetchPlans();
+      const res = await fetch(`${API_BASE}/delete-plan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          index,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data?.status === "ok") {
+        fetchPlans();
+      }
+    } catch (error) {
+      console.error("Failed to delete plan:", error);
+    }
   };
 
   return (
@@ -56,7 +72,6 @@ export default function SavedPlansPage() {
             key={index}
             className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100"
           >
-            {/* HEADER */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Plan #{index + 1}
@@ -70,7 +85,6 @@ export default function SavedPlansPage() {
               </button>
             </div>
 
-            {/* DAYS */}
             {(plan?.days || []).map((day: any, i: number) => (
               <div key={i} className="mb-6">
                 <h3 className="text-lg font-bold text-green-600 mb-3">
