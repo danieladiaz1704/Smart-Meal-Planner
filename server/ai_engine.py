@@ -73,6 +73,7 @@ NUT_KEYWORDS = {
     "peanut butter",
     "cashew butter",
 }
+
 DAIRY_KEYWORDS = {
     "milk",
     "cheese",
@@ -87,6 +88,32 @@ DAIRY_KEYWORDS = {
     "lactose",
     "skyr",
 }
+
+ULTRA_PROCESSED_KEYWORDS = {
+    "protein powder",
+    "whey protein",
+    "casein",
+    "syrup",
+    "artificial sweetener",
+    "sweetener",
+    "margarine",
+    "processed cheese",
+    "instant noodles",
+    "sausage",
+    "hot dog",
+    "bacon bits",
+    "cereal bar",
+    "energy bar",
+    "flavored yogurt",
+    "diet soda",
+    "soda",
+    "soft drink",
+    "chips",
+    "cookies",
+    "cracker",
+    "crackers",
+}
+
 PROTEIN_CATEGORIES = {"protein", "legumes", "dairy", "supplements"}
 
 
@@ -139,6 +166,10 @@ def _normalize_favorites(favorite_proteins: Optional[List[str]]) -> List[str]:
     return [str(x).strip().lower() for x in (favorite_proteins or []) if str(x).strip()]
 
 
+def _normalize_text_list(values: Optional[List[str]]) -> List[str]:
+    return [str(x).strip().lower() for x in (values or []) if str(x).strip()]
+
+
 def _diet_allows_meal(meal_diet: str, requested: DietType) -> bool:
     meal_diet = str(meal_diet).strip().lower()
     if requested == "non-vegetarian":
@@ -149,7 +180,9 @@ def _diet_allows_meal(meal_diet: str, requested: DietType) -> bool:
 
 
 def _favorite_protein_match(main_protein: str, favorite_proteins: Optional[List[str]]) -> int:
-    return int(str(main_protein).strip().lower() in set(_normalize_favorites(favorite_proteins)))
+    mp = str(main_protein).strip().lower()
+    favs = _normalize_favorites(favorite_proteins)
+    return int(any(fav in mp or mp in fav for fav in favs))
 
 
 def _compute_meal_macros(items: List[Dict[str, Any]], ing_df: pd.DataFrame) -> Dict[str, float]:
@@ -283,6 +316,30 @@ def _row_violates_allergies(row: pd.Series, allergies: List[str]) -> bool:
         return True
 
     return any(a not in {"nuts", "dairy"} and a in blob for a in allergies)
+
+
+def _row_is_ultra_processed(row: pd.Series) -> bool:
+    blob = " | ".join(
+        [str(row.get("meal_name", "")).lower()] +
+        [str(x).lower() for x in row.get("ingredients_lc", [])]
+    )
+    return any(k in blob for k in ULTRA_PROCESSED_KEYWORDS)
+
+
+def _row_matches_any_text(row: pd.Series, keywords: List[str]) -> bool:
+    if not keywords:
+        return False
+
+    meal_name = str(row.get("meal_name", "")).lower()
+    ingredients = [str(x).lower() for x in row.get("ingredients_lc", [])]
+
+    for keyword in keywords:
+        if keyword in meal_name:
+            return True
+        if any(keyword in ing for ing in ingredients):
+            return True
+
+    return False
 
 
 def search_recipes(q: str, limit: int = 20) -> List[Dict[str, Any]]:
@@ -461,6 +518,10 @@ def _pick_meal(
     diet_type: DietType,
     meals_per_day: int,
     favorite_proteins: Optional[List[str]],
+    likes: Optional[List[str]] = None,
+    dislikes: Optional[List[str]] = None,
+    favorite_meal_types: Optional[List[str]] = None,
+    preferred_prep_time: Optional[int] = None,
 ) -> Optional[Dict[str, Any]]:
     search_steps = [
         (True, tol),
@@ -485,11 +546,31 @@ def _pick_meal(
     if pool.empty:
         return None
 
+    dislikes = _normalize_text_list(dislikes)
+    if dislikes:
+        pool = pool[
+            ~pool.apply(lambda r: _row_matches_any_text(r, dislikes), axis=1)
+        ].copy()
+
+        if pool.empty:
+            return None
+
     cap = _macro_caps(slot, macro_preference, strict_macro)
     if cap is not None:
         pool = pool[pool["carbs_g"] <= cap].copy()
         if pool.empty:
             return None
+
+    favorites_norm = _normalize_favorites(favorite_proteins)
+    if favorites_norm:
+        preferred_pool = pool[
+            pool["main_protein"].astype(str).str.strip().str.lower().apply(
+                lambda mp: any(fav in mp or mp in fav for fav in favorites_norm)
+            )
+        ].copy()
+
+        if not preferred_pool.empty:
+            pool = preferred_pool
 
     pool["base_score"] = pool.apply(
         lambda r: _score_row(r, target_cal, goal, prep_time_preference, macro_preference),
@@ -514,6 +595,25 @@ def _pick_meal(
         lambda x: _favorite_protein_match(x, favorite_proteins)
     )
 
+    likes = _normalize_text_list(likes)
+    pool["likes_match"] = pool.apply(
+        lambda r: int(_row_matches_any_text(r, likes)),
+        axis=1,
+    )
+
+    favorite_meal_types = _normalize_text_list(favorite_meal_types)
+    current_meal_type = _slot_meal_type(slot)
+    pool["favorite_meal_type_match"] = pool["meal_type"].astype(str).str.lower().apply(
+        lambda mt: int(mt in favorite_meal_types) if favorite_meal_types else int(mt == current_meal_type)
+    )
+
+    if preferred_prep_time is not None:
+        pool["prep_time_distance"] = pool["prep_time_min"].astype(float).apply(
+            lambda x: abs(x - float(preferred_prep_time))
+        )
+    else:
+        pool["prep_time_distance"] = 0.0
+
     if macro_preference == "lower_carb" and strict_macro:
         ml_weight = 25.0
     elif macro_preference == "lower_carb":
@@ -524,10 +624,18 @@ def _pick_meal(
     pool["score"] = (
         pool["base_score"]
         + pool["preference_score"] * ml_weight
-        + pool["favorite_protein_match"] * 18.0
+        + pool["favorite_protein_match"] * 60.0
+        + pool["likes_match"] * 35.0
+        + pool["favorite_meal_type_match"] * 15.0
+        - pool["prep_time_distance"] * 0.8
     )
 
-    return pool.sort_values(["score", "protein_g"], ascending=[False, False]).head(1).iloc[0].to_dict()
+    top_pool = pool.sort_values(["score", "protein_g"], ascending=[False, False]).head(5).copy()
+
+    if top_pool.empty:
+        return None
+
+    return top_pool.sample(1).iloc[0].to_dict()
 
 
 def _build_meal_payload(rec: Dict[str, Any], slot: str, target: float) -> Dict[str, Any]:
@@ -577,17 +685,32 @@ def generate_meal_plan(
     prep_time_preference: PrepTimePreference = "any",
     macro_preference: MacroPreference = "balanced",
     favorite_proteins: Optional[List[str]] = None,
+    likes: Optional[List[str]] = None,
+    dislikes: Optional[List[str]] = None,
+    favorite_meal_types: Optional[List[str]] = None,
+    preferred_prep_time: Optional[int] = None,
 ) -> Dict[str, Any]:
     if _MEALS_DF is None:
         raise RuntimeError("Datasets not initialized. Call init_datasets() on startup.")
 
     allergies = _normalize_allergies(allergies)
+    favorite_proteins = _normalize_favorites(favorite_proteins)
+    likes = _normalize_text_list(likes)
+    dislikes = _normalize_text_list(dislikes)
+    favorite_meal_types = _normalize_text_list(favorite_meal_types)
+
     weights, order = _meal_weights_and_order(meals_per_day)
 
     df = _MEALS_DF[_MEALS_DF["diet_type"].apply(lambda d: _diet_allows_meal(d, diet_type))].copy()
 
     if allergies:
         df = df[~df.apply(lambda r: _row_violates_allergies(r, allergies), axis=1)].copy()
+
+    if dislikes:
+        df = df[~df.apply(lambda r: _row_matches_any_text(r, dislikes), axis=1)].copy()
+
+    if exclude_ultra_processed:
+        df = df[~df.apply(_row_is_ultra_processed, axis=1)].copy()
 
     global_used = set()
     day_plans = []
@@ -645,12 +768,14 @@ def generate_meal_plan(
             selection_note = None
 
             for macro_pref, strict_macro, use_tol, note in attempts:
+                used_for_pick = global_used if variety else set()
+
                 rec = _pick_meal(
                     base_df=df,
                     slot=slot,
                     target_cal=target,
                     goal=goal,
-                    used_meal_ids=global_used,
+                    used_meal_ids=used_for_pick,
                     allergies=allergies,
                     tol=use_tol,
                     prep_time_preference=prep_time_preference,
@@ -659,6 +784,10 @@ def generate_meal_plan(
                     diet_type=diet_type,
                     meals_per_day=meals_per_day,
                     favorite_proteins=favorite_proteins,
+                    likes=likes,
+                    dislikes=dislikes,
+                    favorite_meal_types=favorite_meal_types,
+                    preferred_prep_time=preferred_prep_time,
                 )
                 if rec is not None:
                     selection_note = note
@@ -667,7 +796,9 @@ def generate_meal_plan(
             if rec is None:
                 continue
 
-            global_used.add(int(rec["meal_id"]))
+            if variety:
+                global_used.add(int(rec["meal_id"]))
+
             payload = _build_meal_payload(rec, slot, target)
 
             if selection_note:
@@ -700,7 +831,11 @@ def generate_meal_plan(
             "allergies": allergies,
             "prep_time_preference": prep_time_preference,
             "macro_preference": macro_preference,
-            "favorite_proteins": _normalize_favorites(favorite_proteins),
+            "favorite_proteins": favorite_proteins,
+            "likes": likes,
+            "dislikes": dislikes,
+            "favorite_meal_types": favorite_meal_types,
+            "preferred_prep_time": preferred_prep_time,
         },
         "days": day_plans,
         "overall_totals": overall,
@@ -724,15 +859,30 @@ def replace_meal(
     target_meal_calories: Optional[float] = None,
     exclude_recipe_ids: Optional[List[int]] = None,
     favorite_proteins: Optional[List[str]] = None,
+    likes: Optional[List[str]] = None,
+    dislikes: Optional[List[str]] = None,
+    favorite_meal_types: Optional[List[str]] = None,
+    preferred_prep_time: Optional[int] = None,
 ) -> Dict[str, Any]:
     if _MEALS_DF is None:
         raise RuntimeError("Datasets not initialized. Call init_datasets() on startup.")
 
     allergies = _normalize_allergies(allergies)
+    favorite_proteins = _normalize_favorites(favorite_proteins)
+    likes = _normalize_text_list(likes)
+    dislikes = _normalize_text_list(dislikes)
+    favorite_meal_types = _normalize_text_list(favorite_meal_types)
 
     df = _MEALS_DF[_MEALS_DF["diet_type"].apply(lambda d: _diet_allows_meal(d, diet_type))].copy()
+
     if allergies:
         df = df[~df.apply(lambda r: _row_violates_allergies(r, allergies), axis=1)].copy()
+
+    if dislikes:
+        df = df[~df.apply(lambda r: _row_matches_any_text(r, dislikes), axis=1)].copy()
+
+    if exclude_ultra_processed:
+        df = df[~df.apply(_row_is_ultra_processed, axis=1)].copy()
 
     weights, _ = _meal_weights_and_order(meals_per_day)
     target = (
@@ -789,6 +939,10 @@ def replace_meal(
             diet_type=diet_type,
             meals_per_day=meals_per_day,
             favorite_proteins=favorite_proteins,
+            likes=likes,
+            dislikes=dislikes,
+            favorite_meal_types=favorite_meal_types,
+            preferred_prep_time=preferred_prep_time,
         )
         if rec is not None:
             selection_note = note

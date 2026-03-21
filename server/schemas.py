@@ -45,7 +45,7 @@ class MealPlanRequest(BaseModel):
     dislikes: List[str] = Field(default_factory=list)
 
     favorite_meal_types: List[MealType] = Field(default_factory=list)
-
+    favorite_proteins: List[str] = Field(default_factory=list)
     # Optional numeric preference (used for scoring)
     preferred_prep_time: Optional[int] = None
 
@@ -69,10 +69,11 @@ class ReplaceMealRequest(BaseModel):
     prep_time_preference: PrepTimePreference = "any"
     macro_preference: MacroPreference = "balanced"
 
-    # 🔥 NEW (optional but consistent with AI system)
+   
     likes: List[str] = Field(default_factory=list)
     dislikes: List[str] = Field(default_factory=list)
     favorite_meal_types: List[MealType] = Field(default_factory=list)
+    favorite_proteins: List[str] = Field(default_factory=list)
     preferred_prep_time: Optional[int] = None
 
     # What to replace

@@ -3,146 +3,206 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000";
+const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
 
-/* match FastAPI response*/
-
-type Ingredient = {
-  FoodID: number;
-  FoodDescription: string;
-  FoodGroupName: string;
-};
-
-type MacroTotals = {
-  calories_kcal: number;
-  protein_g: number;
-  fat_g: number;
-  carbs_g: number;
-};
-
-type MealFromAPI = {
-  meal_number: number;
-  recipe_name: string;
+type Meal = {
+  meal_type: string;
+  slot: string;
+  recipe_id: number;
+  name: string;
+  minutes: number;
   target_calories: number;
-  ingredients: Ingredient[];
-  totals: MacroTotals;
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g: number;
+  sugar_g: number;
+  predicted_preference?: string;
+  preference_score?: number;
+  main_protein?: string;
+  ingredients?: string[];
+  diet_type?: string;
+  selection_note?: string;
 };
 
-type DayFromAPI = {
+type DayPlan = {
   day: number;
-  meals: MealFromAPI[];
-  day_totals: MacroTotals;
+  meals: Meal[];
+  totals: {
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    fiber_g: number;
+    sugar_g: number;
+  };
 };
 
-type MealPlanRequest = {
+type PlanData = {
+  meta?: {
+    days: number;
+    meals_per_day: number;
+    diet_type: string;
+    goal: string;
+    exclude_ultra_processed: boolean;
+    variety: boolean;
+    allergies: string[];
+    prep_time_preference: string;
+    macro_preference: string;
+    favorite_proteins: string[];
+    likes?: string[];
+    dislikes?: string[];
+    favorite_meal_types?: string[];
+    preferred_prep_time?: number | null;
+  };
+  days: DayPlan[];
+  overall_totals?: {
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    fiber_g: number;
+    sugar_g: number;
+  };
+  shopping_list?: {
+    total_unique: number;
+    items: { ingredient: string; count: number }[];
+  };
+};
+
+type PlanResponse = {
+  status: "ok";
+  plan: PlanData;
+};
+
+type RequestPayload = {
   calories: number;
   meals_per_day: number;
   days: number;
-  diet_type: "vegetarian" | "non-vegetarian";
+  diet_type: "vegan" | "vegetarian" | "non-vegetarian";
   goal: "lose_weight" | "maintain" | "gain_muscle";
   allergies: string[];
   exclude_ultra_processed: boolean;
-  variety?: boolean;
+  variety: boolean;
+  prep_time_preference: "any" | "quick" | "moderate";
+  macro_preference: "balanced" | "high_protein" | "high_carb" | "lower_carb";
+  favorite_proteins: string[];
+  likes: string[];
+  dislikes: string[];
+  favorite_meal_types: string[];
+  preferred_prep_time?: number | null;
 };
-
-type MealPlanResponseOK = {
-  status: "ok";
-  request: MealPlanRequest;
-  plan: DayFromAPI[];
-  plan_totals: MacroTotals;
-  explainability?: unknown;
-};
-
-type MealPlanResponseERR = {
-  status: "error";
-  message?: string;
-};
-
-type MealPlanResponse = MealPlanResponseOK | MealPlanResponseERR;
-
-type ReplaceMealResponse = {
-  status: "ok" | "error";
-  replacement?: {
-    recipe_name: string;
-    ingredients: Ingredient[];
-    totals: MacroTotals;
-  };
-  detail?: string;
-  message?: string;
-};
-
-/* Page */
 
 export default function MealPlanPage() {
   const router = useRouter();
 
-  const [data, setData] = useState<MealPlanResponse | null>(null);
+  const [requestData, setRequestData] = useState<RequestPayload | null>(null);
+  const [result, setResult] = useState<PlanResponse | null>(null);
   const [activeDay, setActiveDay] = useState<number>(1);
-
-  const [busyMeal, setBusyMeal] = useState<number | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("meal_plan_result");
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as MealPlanResponse;
-      setData(parsed);
-
-      if (parsed.status === "ok" && parsed.plan.length > 0) {
-        setActiveDay(parsed.plan[0].day);
-      }
-    } catch {
-      // ignore
+    const currentUser = localStorage.getItem("currentUser");
+    if (!currentUser) {
+      router.push("/login");
+      return;
     }
-  }, []);
 
-  const hasPlan = data?.status === "ok";
+    const savedRequest = sessionStorage.getItem("mealPlanRequest");
+    const savedResult = sessionStorage.getItem("mealPlanResult");
 
-  const planType = useMemo(() => {
-    if (!hasPlan) return "Daily";
-    return data.request.days > 1 ? "Weekly" : "Daily";
-  }, [hasPlan, data]);
-
-  const active = useMemo(() => {
-    if (!hasPlan) return null;
-    return data.plan.find((d) => d.day === activeDay) ?? data.plan[0] ?? null;
-  }, [hasPlan, data, activeDay]);
-
-  const summary = useMemo(() => {
-    if (!hasPlan) return null;
-    const t = data.plan_totals;
-    return [
-      { label: "Calories", value: `${Math.round(t.calories_kcal)} kcal` },
-      { label: "Protein", value: `${Math.round(t.protein_g)} g` },
-      { label: "Carbs", value: `${Math.round(t.carbs_g)} g` },
-      { label: "Fat", value: `${Math.round(t.fat_g)} g` },
-    ];
-  }, [hasPlan, data]);
-
-  async function handleReplaceMeal(meal_number: number) {
-    if (!hasPlan) return;
-
-    setErr(null);
-    setBusyMeal(meal_number);
+    if (!savedRequest || !savedResult) {
+      router.push("/planner");
+      return;
+    }
 
     try {
-      const day = active;
-      const req = data.request;
+      const parsedRequest = JSON.parse(savedRequest);
+      const parsedResult = JSON.parse(savedResult);
 
-      const target =
-        day?.meals.find((m) => m.meal_number === meal_number)?.target_calories ??
-        req.calories / req.meals_per_day;
+      setRequestData(parsedRequest);
+      setResult(parsedResult);
+      setActiveDay(1);
+    } catch {
+      router.push("/planner");
+    }
+  }, [router]);
+
+  const days = result?.plan?.days ?? [];
+  const activeDayObj = useMemo(
+    () => days.find((d) => d.day === activeDay) ?? days[0] ?? null,
+    [days, activeDay]
+  );
+
+  const persistResult = (next: PlanResponse) => {
+    setResult(next);
+    sessionStorage.setItem("mealPlanResult", JSON.stringify(next));
+  };
+
+  const handleSavePlan = async () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+      if (!currentUser?.email || !result?.plan) {
+        alert("No plan to save");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/save-plan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          plan: result.plan,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data?.status !== "ok") {
+        throw new Error(data?.detail || "Failed to save plan");
+      }
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to save plan");
+    }
+  };
+
+  const handleReplace = async (slot: string, target: number, currentRecipeId: number) => {
+    if (!result?.plan || !activeDayObj || !requestData) return;
+
+    setError(null);
+
+    try {
+      const excludeIds = (activeDayObj.meals ?? [])
+        .map((m) => Number(m.recipe_id))
+        .filter((id) => Number.isFinite(id));
+
+      if (!excludeIds.includes(Number(currentRecipeId))) {
+        excludeIds.push(Number(currentRecipeId));
+      }
 
       const payload = {
-        calories: req.calories,
-        meals_per_day: req.meals_per_day,
-        diet_type: req.diet_type,
-        goal: req.goal,
-        allergies: req.allergies ?? [],
-        exclude_ultra_processed: req.exclude_ultra_processed ?? false,
-        target_meal_calories: target,
+        calories: requestData.calories,
+        meals_per_day: requestData.meals_per_day,
+        diet_type: requestData.diet_type,
+        goal: requestData.goal,
+        allergies: requestData.allergies ?? [],
+        exclude_ultra_processed: requestData.exclude_ultra_processed ?? false,
+        variety: requestData.variety ?? true,
+        prep_time_preference: requestData.prep_time_preference ?? "any",
+        macro_preference: requestData.macro_preference ?? "balanced",
+        favorite_proteins: requestData.favorite_proteins ?? [],
+        likes: requestData.likes ?? [],
+        dislikes: requestData.dislikes ?? [],
+        favorite_meal_types: requestData.favorite_meal_types ?? [],
+        preferred_prep_time: requestData.preferred_prep_time ?? null,
+        day: activeDay,
+        slot,
+        target_meal_calories: Number(target),
+        exclude_recipe_ids: excludeIds,
       };
 
       const res = await fetch(`${API_BASE}/replace-meal`, {
@@ -151,368 +211,420 @@ export default function MealPlanPage() {
         body: JSON.stringify(payload),
       });
 
-      const j = (await res.json().catch(() => ({}))) as ReplaceMealResponse;
+      const data = await res.json();
 
-      if (!res.ok) {
-        
-        const msg = (j as any)?.detail ?? j.message ?? `Replace failed (HTTP ${res.status})`;
-        throw new Error(String(msg));
+      if (!res.ok || data?.status !== "ok") {
+        throw new Error(data?.detail ?? "Replace failed");
       }
 
-      if (j.status !== "ok" || !j.replacement) {
-        throw new Error(j.message ?? "No replacement returned");
-      }
+      const newMeal: Meal = data.meal;
 
-      const replacement = j.replacement;
+      const newDays = (result.plan.days ?? []).map((d) => {
+        if (d.day !== activeDay) return d;
 
-      
-      setData((prev) => {
-        if (!prev || prev.status !== "ok") return prev;
-
-        const newPlan = prev.plan.map((d) => {
-          if (d.day !== activeDay) return d;
-
-          const newMeals = d.meals.map((m) =>
-            m.meal_number === meal_number
-              ? {
-                  ...m,
-                  recipe_name: replacement.recipe_name,
-                  ingredients: replacement.ingredients,
-                  totals: replacement.totals,
-                }
-              : m
-          );
-
-          
-          const dayTotals = newMeals.reduce<MacroTotals>(
-            (acc, m) => ({
-              calories_kcal: acc.calories_kcal + m.totals.calories_kcal,
-              protein_g: acc.protein_g + m.totals.protein_g,
-              fat_g: acc.fat_g + m.totals.fat_g,
-              carbs_g: acc.carbs_g + m.totals.carbs_g,
-            }),
-            { calories_kcal: 0, protein_g: 0, fat_g: 0, carbs_g: 0 }
-          );
-
-          return { ...d, meals: newMeals, day_totals: dayTotals };
-        });
-
-       
-        const planTotals = newPlan.reduce<MacroTotals>(
-          (acc, d) => ({
-            calories_kcal: acc.calories_kcal + d.day_totals.calories_kcal,
-            protein_g: acc.protein_g + d.day_totals.protein_g,
-            fat_g: acc.fat_g + d.day_totals.fat_g,
-            carbs_g: acc.carbs_g + d.day_totals.carbs_g,
-          }),
-          { calories_kcal: 0, protein_g: 0, fat_g: 0, carbs_g: 0 }
+        const updatedMeals = (d.meals ?? []).map((mm) =>
+          (mm.slot ?? mm.meal_type) === slot ? newMeal : mm
         );
 
-        const next: MealPlanResponseOK = { ...prev, plan: newPlan, plan_totals: planTotals };
-        sessionStorage.setItem("meal_plan_result", JSON.stringify(next));
-        return next;
+        const totals = updatedMeals.reduce(
+          (acc, mm) => {
+            acc.calories += Number(mm.calories || 0);
+            acc.protein_g += Number(mm.protein_g || 0);
+            acc.carbs_g += Number(mm.carbs_g || 0);
+            acc.fat_g += Number(mm.fat_g || 0);
+            acc.fiber_g += Number(mm.fiber_g || 0);
+            acc.sugar_g += Number(mm.sugar_g || 0);
+            return acc;
+          },
+          {
+            calories: 0,
+            protein_g: 0,
+            carbs_g: 0,
+            fat_g: 0,
+            fiber_g: 0,
+            sugar_g: 0,
+          }
+        );
+
+        return {
+          ...d,
+          meals: updatedMeals,
+          totals: {
+            calories: Number(totals.calories.toFixed(1)),
+            protein_g: Number(totals.protein_g.toFixed(1)),
+            carbs_g: Number(totals.carbs_g.toFixed(1)),
+            fat_g: Number(totals.fat_g.toFixed(1)),
+            fiber_g: Number(totals.fiber_g.toFixed(1)),
+            sugar_g: Number(totals.sugar_g.toFixed(1)),
+          },
+        };
       });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Replace failed";
-      setErr(msg);
-    } finally {
-      setBusyMeal(null);
+
+      const overall = newDays.reduce(
+        (acc, d) => {
+          acc.calories += Number(d.totals?.calories || 0);
+          acc.protein_g += Number(d.totals?.protein_g || 0);
+          acc.carbs_g += Number(d.totals?.carbs_g || 0);
+          acc.fat_g += Number(d.totals?.fat_g || 0);
+          acc.fiber_g += Number(d.totals?.fiber_g || 0);
+          acc.sugar_g += Number(d.totals?.sugar_g || 0);
+          return acc;
+        },
+        {
+          calories: 0,
+          protein_g: 0,
+          carbs_g: 0,
+          fat_g: 0,
+          fiber_g: 0,
+          sugar_g: 0,
+        }
+      );
+
+      const ctr = new Map<string, number>();
+
+      for (const d of newDays) {
+        for (const mm of d.meals ?? []) {
+          for (const ing of mm.ingredients ?? []) {
+            const k = String(ing).trim().toLowerCase();
+            if (!k) continue;
+            ctr.set(k, (ctr.get(k) ?? 0) + 1);
+          }
+        }
+      }
+
+      const shoppingItems = Array.from(ctr.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([ingredient, count]) => ({ ingredient, count }));
+
+      const next: PlanResponse = {
+        ...result,
+        plan: {
+          ...result.plan,
+          days: newDays,
+          overall_totals: {
+            calories: Number(overall.calories.toFixed(1)),
+            protein_g: Number(overall.protein_g.toFixed(1)),
+            carbs_g: Number(overall.carbs_g.toFixed(1)),
+            fat_g: Number(overall.fat_g.toFixed(1)),
+            fiber_g: Number(overall.fiber_g.toFixed(1)),
+            sugar_g: Number(overall.sugar_g.toFixed(1)),
+          },
+          shopping_list: {
+            total_unique: shoppingItems.length,
+            items: shoppingItems,
+          },
+        },
+      };
+
+      persistResult(next);
+    } catch (e: any) {
+      setError(e?.message ?? "Replace failed");
     }
+  };
+
+  if (!result?.plan) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-orange-50 text-slate-900">
+        <div className="mx-auto max-w-4xl px-5 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
+            <p className="text-lg font-extrabold">No plan found</p>
+            <p className="text-sm text-slate-600 mt-2">
+              Generate a plan first.
+            </p>
+            <button
+              onClick={() => router.push("/planner")}
+              className="mt-4 rounded-2xl px-5 py-3 bg-rose-600 text-white font-bold"
+            >
+              Go to Planner
+            </button>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-orange-50 p-6 text-slate-900">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Hero */}
-        <section className="relative overflow-hidden rounded-[32px] border bg-white/70 backdrop-blur p-6 sm:p-10 shadow-sm">
-          <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-rose-300/45 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-28 -right-28 h-80 w-80 rounded-full bg-orange-300/45 blur-3xl" />
+    <main className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-orange-50 text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-rose-200/40 to-transparent" />
 
-          <div className="relative grid gap-8 lg:grid-cols-[1.05fr_0.95fr] items-center">
-            <div className="space-y-4 animate-fadeUp">
-              <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-4 py-2 shadow-sm">
-                <span className="h-2 w-2 rounded-full bg-rose-500" />
-                <p className="text-xs font-bold text-rose-700">
-                  Smart Meal Planner • CNF-powered • Explainable AI
-                </p>
-              </div>
+      <div className="relative mx-auto max-w-6xl px-5 py-8">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <button
+            onClick={() => router.push("/planner")}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-2 font-semibold hover:border-rose-200 transition"
+          >
+            ← Edit questions
+          </button>
 
-              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                Your {planType} Meal Plan
-              </h1>
+          <div className="hidden sm:flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-4 py-2 shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-rose-500" />
+            <p className="text-sm font-semibold text-rose-700">Meal Plan Results</p>
+          </div>
+        </div>
 
-              <p className="text-sm sm:text-base text-slate-600 max-w-xl">
-                Meal planning is time consuming. We generate balanced plans from your goal,
-                calories, diet, and allergies fast.
-              </p>
+        {error && (
+          <div className="mb-4 text-sm text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-2xl">
+            {error}
+          </div>
+        )}
 
-              <div className="flex flex-wrap gap-2 pt-1">
-                <Chip label={`Diet: ${hasPlan ? data.request.diet_type : "-"}`} />
-                <Chip label={`Goal: ${hasPlan ? data.request.goal : "-"}`} />
-                <Chip label={`Meals/day: ${hasPlan ? data.request.meals_per_day : "-"}`} />
-                <Chip
-                  label={`Allergies: ${
-                    hasPlan && data.request.allergies.length
-                      ? data.request.allergies.join(", ")
-                      : "None"
-                  }`}
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-3">
-                <button
-                  onClick={() => router.push("/planner")}
-                  className="rounded-2xl px-5 py-3 border border-slate-200 bg-white font-bold hover:border-rose-300 transition"
-                >
-                  ← Planner
-                </button>
+        <section className="min-w-0 overflow-hidden">
+          <div className="rounded-3xl border border-slate-200 bg-white/85 backdrop-blur shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-500">Today snapshot</p>
+                <h2 className="text-2xl font-extrabold">
+                  {activeDayObj
+                    ? `Day ${activeDayObj.day} • ${activeDayObj.totals?.calories ?? 0} kcal`
+                    : "No plan yet"}
+                </h2>
 
                 <button
-                  onClick={() => {
-                    sessionStorage.removeItem("meal_plan_result");
-                    router.push("/planner");
-                  }}
-                  className="rounded-2xl px-5 py-3 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
+                  onClick={handleSavePlan}
+                  className="mt-3 px-5 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition"
                 >
-                  New Plan
+                  Save Plan
                 </button>
               </div>
 
-              {err && (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
-                  {err}
+              {days.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {days.map((d) => (
+                    <button
+                      key={d.day}
+                      onClick={() => setActiveDay(d.day)}
+                      className={[
+                        "rounded-full px-4 py-2 text-sm font-bold border transition",
+                        activeDay === d.day
+                          ? "bg-rose-600 text-white border-rose-600"
+                          : "bg-white text-slate-700 border-slate-200 hover:border-rose-200",
+                      ].join(" ")}
+                    >
+                      Day {d.day}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Preview */}
-            <div className="relative animate-fadeUp">
-              <div className="absolute -top-10 -right-6 rotate-6 opacity-90 animate-floaty">
-                <PlateSvg />
-              </div>
-
-              <div className="rounded-3xl border border-rose-100 bg-white/85 backdrop-blur p-5 shadow-[0_10px_30px_rgba(244,63,94,0.10)]">
-                <p className="text-xs font-bold text-slate-500">Today snapshot</p>
-                <p className="text-lg font-extrabold mt-1">
-                  Day {active?.day ?? 1} •{" "}
-                  {Math.round(active?.day_totals.calories_kcal ?? 0)} kcal
-                </p>
-
-                <div className="mt-4 grid gap-3">
-                  {(active?.meals ?? []).slice(0, 3).map((m) => (
-                    <div
-                      key={m.meal_number}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <MealThumb idx={m.meal_number} />
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold truncate">{m.recipe_name}</p>
-                          <p className="text-xs text-slate-500 truncate">
-                            {m.ingredients.map((i) => i.FoodDescription).join(", ")}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-xs font-bold text-slate-600 shrink-0">
-                        {Math.round(m.totals.calories_kcal)} kcal
-                      </p>
-                    </div>
+            <div className="p-6 space-y-4 overflow-hidden">
+              {!activeDayObj ? (
+                <EmptyState />
+              ) : (
+                <>
+                  {(activeDayObj.meals ?? []).map((m, idx) => (
+                    <MealCard
+                      key={`${m.recipe_id}-${idx}`}
+                      meal={m}
+                      index={idx + 1}
+                      onReplace={handleReplace}
+                    />
                   ))}
-                </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-                  <MiniStat label="Protein" value={`${Math.round(active?.day_totals.protein_g ?? 0)}g`} />
-                  <MiniStat label="Carbs" value={`${Math.round(active?.day_totals.carbs_g ?? 0)}g`} />
-                  <MiniStat label="Fat" value={`${Math.round(active?.day_totals.fat_g ?? 0)}g`} />
-                </div>
-              </div>
+                  <div className="grid sm:grid-cols-3 gap-3 pt-2">
+                    <Stat title="Protein" value={`${activeDayObj.totals?.protein_g ?? 0} g`} />
+                    <Stat title="Carbs" value={`${activeDayObj.totals?.carbs_g ?? 0} g`} />
+                    <Stat title="Fat" value={`${activeDayObj.totals?.fat_g ?? 0} g`} />
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs font-bold text-slate-700">Explainability</p>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Rule-Based Filtering + Goal-Aware Ranking + Machine Learning
+                      Preference Score + User Macro / Prep Preferences
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </section>
 
-        {!hasPlan && (
-          <section className="rounded-3xl border bg-white p-6 shadow-sm">
-            <h2 className="font-bold text-lg">No plan found</h2>
-            <p className="text-slate-600 mt-2 text-sm">
-              Generate a plan first in <span className="font-semibold">/planner</span>.
-            </p>
-          </section>
-        )}
+          {result?.plan?.overall_totals && (
+            <div className="grid sm:grid-cols-4 gap-3 mt-4">
+              <Stat title="Plan calories" value={`${result.plan.overall_totals.calories} kcal`} />
+              <Stat title="Protein" value={`${result.plan.overall_totals.protein_g} g`} />
+              <Stat title="Carbs" value={`${result.plan.overall_totals.carbs_g} g`} />
+              <Stat title="Fat" value={`${result.plan.overall_totals.fat_g} g`} />
+            </div>
+          )}
 
-        {hasPlan && summary && (
-          <section className="grid gap-3 sm:grid-cols-4">
-            {summary.map((s) => (
-              <div key={s.label} className="rounded-3xl border bg-white/80 backdrop-blur p-5 shadow-sm">
-                <p className="text-xs font-semibold text-slate-500">{s.label}</p>
-                <p className="text-lg font-extrabold mt-1">{s.value}</p>
+          {result?.plan?.shopping_list?.items?.length ? (
+            <div className="mt-4 rounded-3xl border border-slate-200 bg-white/85 backdrop-blur shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-600">Shopping list</p>
+                  <p className="text-sm text-slate-500">
+                    {result.plan.shopping_list.total_unique} unique ingredients
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const text = result.plan.shopping_list?.items
+                      ?.map((x) => `${x.ingredient} (x${x.count})`)
+                      .join("\n");
+                    navigator.clipboard.writeText(text || "");
+                  }}
+                  className="rounded-2xl px-4 py-2 border border-slate-200 bg-white font-bold hover:border-rose-200 transition"
+                >
+                  Copy list
+                </button>
               </div>
-            ))}
-          </section>
-        )}
 
-        {hasPlan && active && (
-          <>
-            <section className="rounded-3xl border bg-white/80 backdrop-blur p-5 shadow-sm">
-              <div className="flex flex-wrap gap-2">
-                {data.plan.map((d) => (
-                  <button
-                    key={d.day}
-                    onClick={() => setActiveDay(d.day)}
-                    className={[
-                      "rounded-full px-4 py-2 text-sm font-semibold border transition",
-                      activeDay === d.day
-                        ? "bg-gradient-to-r from-rose-600 to-orange-500 text-white border-transparent"
-                        : "bg-white border-slate-200 hover:border-rose-300",
-                    ].join(" ")}
+              <div className="p-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {result.plan.shopping_list.items.slice(0, 24).map((it) => (
+                  <div
+                    key={it.ingredient}
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
                   >
-                    Day {d.day}
-                  </button>
+                    <span className="font-semibold">{it.ingredient}</span>
+                    <span className="text-slate-500"> ×{it.count}</span>
+                  </div>
                 ))}
               </div>
-
-              <div className="mt-4">
-                <h2 className="text-xl font-extrabold">Day {active.day}</h2>
-                <p className="text-sm text-slate-600">
-                  Total:{" "}
-                  <span className="font-semibold">
-                    {Math.round(active.day_totals.calories_kcal)} kcal
-                  </span>{" "}
-                  · P {Math.round(active.day_totals.protein_g)}g · C{" "}
-                  {Math.round(active.day_totals.carbs_g)}g · F{" "}
-                  {Math.round(active.day_totals.fat_g)}g
-                </p>
-              </div>
-            </section>
-
-            <section className="grid gap-4">
-              {active.meals.map((m) => (
-                <div key={m.meal_number} className="rounded-3xl border bg-white p-6 shadow-sm">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex gap-4">
-                      <MealThumbBig idx={m.meal_number} />
-                      <div>
-                        <p className="text-xs font-semibold text-slate-500">
-                          Meal {m.meal_number}
-                        </p>
-                        <p className="text-xl font-extrabold">{m.recipe_name}</p>
-                        <p className="text-sm text-slate-600 mt-1 max-w-3xl">
-                          {m.ingredients.map((i) => i.FoodDescription).join(", ")}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="text-xs text-slate-500 font-semibold">Calories</p>
-                      <p className="text-lg font-extrabold">
-                        {Math.round(m.totals.calories_kcal)} kcal
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Target: {Math.round(m.target_calories)} kcal
-                      </p>
-
-                      <button
-                        onClick={() => handleReplaceMeal(m.meal_number)}
-                        disabled={busyMeal === m.meal_number}
-                        className="mt-3 rounded-2xl px-4 py-2 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 disabled:opacity-60"
-                      >
-                        {busyMeal === m.meal_number ? "Replacing..." : "Replace meal"}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Badge label={`Protein ${Math.round(m.totals.protein_g)}g`} />
-                    <Badge label={`Carbs ${Math.round(m.totals.carbs_g)}g`} />
-                    <Badge label={`Fat ${Math.round(m.totals.fat_g)}g`} />
-                  </div>
-                </div>
-              ))}
-            </section>
-          </>
-        )}
+            </div>
+          ) : null}
+        </section>
       </div>
     </main>
   );
 }
 
-/* ---------- small components ---------- */
-
-function Chip({ label }: { label: string }) {
+function Stat({ title, value }: { title: string; value: string }) {
   return (
-    <span className="rounded-full border border-rose-200 bg-white/80 px-3 py-1 text-xs font-bold text-rose-700 shadow-sm">
-      {label}
-    </span>
-  );
-}
-
-function Badge({ label }: { label: string }) {
-  return (
-    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-      {label}
-    </span>
-  );
-}
-
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3">
-      <p className="text-[10px] font-bold text-slate-500">{label}</p>
-      <p className="text-sm font-extrabold text-slate-900 mt-1">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <p className="text-xs font-bold text-slate-600">{title}</p>
+      <p className="text-lg font-extrabold text-slate-900 mt-1">{value}</p>
     </div>
   );
 }
 
-function MealThumb({ idx }: { idx: number }) {
-  const styles = [
-    "from-rose-500 to-orange-400",
-    "from-orange-500 to-amber-400",
-    "from-fuchsia-500 to-rose-400",
-    "from-emerald-500 to-cyan-400",
-    "from-indigo-500 to-sky-400",
-    "from-teal-500 to-lime-400",
-  ];
-  const s = styles[idx % styles.length];
-  return <div className={`h-10 w-10 rounded-2xl bg-gradient-to-br ${s} shadow-sm`} />;
-}
-
-function MealThumbBig({ idx }: { idx: number }) {
-  const styles = [
-    "from-rose-500 to-orange-400",
-    "from-orange-500 to-amber-400",
-    "from-fuchsia-500 to-rose-400",
-    "from-emerald-500 to-cyan-400",
-    "from-indigo-500 to-sky-400",
-    "from-teal-500 to-lime-400",
-  ];
-  const s = styles[idx % styles.length];
+function EmptyState() {
   return (
-    <div className={`h-14 w-14 rounded-3xl bg-gradient-to-br ${s} shadow-[0_10px_30px_rgba(244,63,94,0.15)]`} />
+    <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
+      <p className="text-lg font-extrabold">No plan yet</p>
+      <p className="text-sm text-slate-600 mt-2">Generate a plan first.</p>
+    </div>
   );
 }
 
-function PlateSvg() {
+function MealCard({
+  meal,
+  index,
+  onReplace,
+}: {
+  meal: Meal;
+  index: number;
+  onReplace: (slot: string, target: number, currentRecipeId: number) => void;
+}) {
+  const title =
+    meal.slot && meal.slot !== meal.meal_type
+      ? `${meal.meal_type} (${meal.slot})`
+      : meal.meal_type;
+
+  const preference = meal.predicted_preference;
+  const score =
+    typeof meal.preference_score === "number" ? meal.preference_score : null;
+
+  const preferenceBadgeClass =
+    preference === "High"
+      ? "bg-green-100 text-green-700 border-green-200"
+      : preference === "Medium"
+      ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+      : preference === "Low"
+      ? "bg-red-100 text-red-700 border-red-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
+
   return (
-    <svg width="160" height="160" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-      <circle cx="100" cy="100" r="76" fill="url(#g1)" opacity="0.85" />
-      <circle cx="100" cy="100" r="56" fill="white" opacity="0.9" />
-      <circle cx="100" cy="100" r="40" fill="url(#g2)" opacity="0.8" />
-      <path
-        d="M72 95c10-8 18-8 28 0s18 8 28 0"
-        stroke="white"
-        strokeWidth="6"
-        strokeLinecap="round"
-        opacity="0.9"
-      />
-      <defs>
-        <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(70 60) rotate(45) scale(120)">
-          <stop stopColor="#fb7185" />
-          <stop offset="1" stopColor="#fb923c" />
-        </radialGradient>
-        <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(120 120) rotate(45) scale(90)">
-          <stop stopColor="#a78bfa" />
-          <stop offset="1" stopColor="#fb7185" />
-        </radialGradient>
-      </defs>
-    </svg>
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm overflow-hidden">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-slate-500">
+            Meal {index} • {title}
+          </p>
+
+          <p className="text-sm font-extrabold text-slate-900 truncate">
+            {meal.name}
+          </p>
+
+          <p className="text-xs text-slate-500 mt-1">⏱ Prep time: {meal.minutes} min</p>
+
+          {meal.main_protein && (
+            <p className="text-xs text-slate-500 mt-1 capitalize">
+              Main protein: {meal.main_protein}
+            </p>
+          )}
+
+          {meal.selection_note && (
+            <p className="mt-2 text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 inline-block">
+              {meal.selection_note}
+            </p>
+          )}
+
+          {preference && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-bold ${preferenceBadgeClass}`}
+              >
+                {preference} Preference
+              </span>
+
+              {score !== null && score >= 0.85 && (
+                <span className="rounded-full border border-orange-200 bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">
+                  🔥 Top Recommendation
+                </span>
+              )}
+            </div>
+          )}
+
+          {score !== null && (
+            <p className="mt-2 text-xs text-slate-500">
+              Match Score: {(score * 100).toFixed(0)}%
+            </p>
+          )}
+
+          <div className="mt-2 flex flex-wrap gap-2 text-xs">
+            <Tag label={`P ${meal.protein_g}g`} />
+            <Tag label={`C ${meal.carbs_g}g`} />
+            <Tag label={`F ${meal.fat_g}g`} />
+            <Tag label={`Fiber ${meal.fiber_g}g`} />
+            <Tag label={`Sugar ${meal.sugar_g}g`} />
+          </div>
+
+          <p className="text-xs text-slate-600 mt-2 line-clamp-2">
+            {(meal.ingredients ?? []).slice(0, 6).join(", ")}
+            {(meal.ingredients ?? []).length > 6 ? "..." : ""}
+          </p>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <p className="text-sm font-extrabold text-slate-900">{meal.calories} kcal</p>
+          <p className="text-xs text-slate-500 mt-1">
+            Target {meal.target_calories} kcal
+          </p>
+
+          <button
+            onClick={() =>
+              onReplace(
+                meal.slot ?? meal.meal_type,
+                Number(meal.target_calories),
+                Number(meal.recipe_id)
+              )
+            }
+            className="mt-3 rounded-2xl px-4 py-2 border border-slate-200 bg-white font-bold hover:border-rose-200 transition text-sm"
+          >
+            Replace
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Tag({ label }: { label: string }) {
+  return (
+    <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-bold text-slate-700">
+      {label}
+    </span>
   );
 }

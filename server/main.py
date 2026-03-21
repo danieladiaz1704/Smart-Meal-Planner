@@ -21,11 +21,10 @@ from schemas import MealPlanRequest, ReplaceMealRequest
 # -----------------------------
 client = MongoClient(
     "mongodb+srv://sehgalishika14_db_user:nnVcP1KmQniBF6y8@cluster0.nbrnb3c.mongodb.net/meal_planner_db?retryWrites=true&w=majority",
-    serverSelectionTimeoutMS=5000
+    serverSelectionTimeoutMS=5000,
 )
 
 db = client["meal_planner_db"]
-
 users_collection = db["users"]
 plans_collection = db["plans"]
 
@@ -39,7 +38,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
-    "http://127.0.0.1:3001"
+    "http://127.0.0.1:3001",
 ]
 
 app = FastAPI(
@@ -63,8 +62,11 @@ app.add_middleware(
 def startup():
     try:
         init_datasets(DATA_DIR)
+        print("Datasets loaded successfully.")
     except Exception as e:
+        print("Dataset load failed:", str(e))
         raise RuntimeError(f"Dataset load failed: {str(e)}")
+
 
 # -----------------------------
 # STATUS
@@ -76,16 +78,21 @@ def status() -> Dict[str, Any]:
         "datasets": get_recipe_status(),
     }
 
+
 # -----------------------------
 # SEARCH
 # -----------------------------
 @app.get("/foods/search")
-def foods_search(q: str = Query(..., min_length=1), limit: int = Query(20)):
+def foods_search(
+    q: str = Query(..., min_length=1),
+    limit: int = Query(20, ge=1, le=100),
+):
     try:
         items = search_recipes(q=q, limit=int(limit))
         return {"status": "ok", "items": items}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # -----------------------------
 # GENERATE PLAN
@@ -104,10 +111,16 @@ def generate_plan(req: MealPlanRequest):
             variety=req.variety,
             prep_time_preference=req.prep_time_preference,
             macro_preference=req.macro_preference,
+            favorite_proteins=req.favorite_proteins,
+            likes=req.likes,
+            dislikes=req.dislikes,
+            favorite_meal_types=req.favorite_meal_types,
+            preferred_prep_time=req.preferred_prep_time,
         )
         return {"status": "ok", "plan": plan}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # -----------------------------
 # REPLACE MEAL
@@ -128,54 +141,55 @@ def replace_single_meal(req: ReplaceMealRequest):
             slot=req.slot,
             target_meal_calories=req.target_meal_calories,
             exclude_recipe_ids=req.exclude_recipe_ids,
+            favorite_proteins=req.favorite_proteins,
+            likes=req.likes,
+            dislikes=req.dislikes,
+            favorite_meal_types=req.favorite_meal_types,
+            preferred_prep_time=req.preferred_prep_time,
         )
         return {"status": "ok", "meal": meal}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # -----------------------------
 # SIGNUP API
 # -----------------------------
 @app.post("/signup")
 def signup(user: dict):
-    email = user.get("email")
-    password = user.get("password")
+    email = str(user.get("email", "")).strip().lower()
+    password = str(user.get("password", "")).strip()
 
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
     existing_user = users_collection.find_one({"email": email})
-
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
     users_collection.insert_one({
         "email": email,
-        "password": password
+        "password": password,
     })
 
     return {"status": "ok", "message": "User created"}
+
 
 # -----------------------------
 # LOGIN API
 # -----------------------------
 @app.post("/login")
 def login(user: dict):
-    print("🔥 Login API called")
-
-    email = user.get("email")
-    password = user.get("password")
+    email = str(user.get("email", "")).strip().lower()
+    password = str(user.get("password", "")).strip()
 
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
 
     try:
-        # 🔍 check user in MongoDB
         existing_user = users_collection.find_one({"email": email})
-        print("👉 User found:", existing_user)
-
     except Exception as e:
-        print("❌ MongoDB ERROR:", str(e))
+        print("MongoDB ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Database connection error")
 
     if not existing_user:
@@ -191,45 +205,56 @@ def login(user: dict):
         }
     }
 
+
 # -----------------------------
 # SAVE PLAN
 # -----------------------------
 @app.post("/save-plan")
 def save_plan(data: dict):
-    email = data.get("email")
+    email = str(data.get("email", "")).strip().lower()
     plan = data.get("plan")
 
-    if not email or not plan:
+    if not email or plan is None:
         raise HTTPException(status_code=400, detail="Missing email or plan")
 
     plans_collection.insert_one({
         "email": email,
-        "plan": plan
+        "plan": plan,
     })
 
     return {"status": "ok"}
+
 
 # -----------------------------
 # GET SAVED PLANS
 # -----------------------------
 @app.get("/saved-plans/{email}")
 def get_saved_plans(email: str):
-    plans = list(plans_collection.find({"email": email}))
+    safe_email = str(email).strip().lower()
+    plans = list(plans_collection.find({"email": safe_email}))
 
     for p in plans:
         p["_id"] = str(p["_id"])
 
     return {
         "status": "ok",
-        "plans": [p["plan"] for p in plans]
+        "plans": [p["plan"] for p in plans],
     }
+
+
 # -----------------------------
 # DELETE PLAN
 # -----------------------------
 @app.post("/delete-plan")
 def delete_plan(data: dict):
-    email = data.get("email")
+    email = str(data.get("email", "")).strip().lower()
     index = data.get("index")
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Missing email")
+
+    if index is None or not isinstance(index, int):
+        raise HTTPException(status_code=400, detail="Invalid index")
 
     plans = list(plans_collection.find({"email": email}))
 
@@ -237,7 +262,6 @@ def delete_plan(data: dict):
         raise HTTPException(status_code=400, detail="Invalid index")
 
     plan_to_delete = plans[index]
-
     plans_collection.delete_one({"_id": plan_to_delete["_id"]})
 
     return {"status": "ok"}
