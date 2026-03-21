@@ -6,6 +6,26 @@ import { useRouter } from "next/navigation";
 const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
 const REQUEST_TIMEOUT_MS = 15000;
 
+const PROTEIN_OPTIONS = [
+  "Chicken breast",
+  "Turkey breast",
+  "Lean ground turkey",
+  "Salmon",
+  "Shrimp",
+  "Canned tuna",
+  "Egg",
+  "Greek yogurt 0%",
+  "Skyr 0%",
+  "Cottage cheese 1%",
+  "Paneer",
+  "Tofu",
+  "Tempeh",
+  "Lentils",
+  "Chickpeas",
+  "Black beans",
+  "Whey protein powder",
+] as const;
+
 type PlanAPIResponse =
   | { status: "ok"; plan: any }
   | { status: "error"; message?: string }
@@ -26,7 +46,10 @@ export default function PlannerPage() {
     calories: 1800,
     meals_per_day: 3,
     days: 3,
-    diet_type: "non-vegetarian" as "vegetarian" | "non-vegetarian",
+    diet_type: "non-vegetarian" as
+      | "vegan"
+      | "vegetarian"
+      | "non-vegetarian",
     goal: "maintain" as "lose_weight" | "maintain" | "gain_muscle",
     allergies: "",
     exclude_ultra_processed: true,
@@ -37,6 +60,7 @@ export default function PlannerPage() {
       | "high_protein"
       | "high_carb"
       | "lower_carb",
+    favorite_proteins: [] as string[],
   });
 
   const [loading, setLoading] = useState(false);
@@ -75,6 +99,19 @@ export default function PlannerPage() {
     return () => abortRef.current?.abort();
   }, []);
 
+  const toggleFavoriteProtein = (protein: string) => {
+    setForm((prev) => {
+      const exists = prev.favorite_proteins.includes(protein);
+
+      return {
+        ...prev,
+        favorite_proteins: exists
+          ? prev.favorite_proteins.filter((p) => p !== protein)
+          : [...prev.favorite_proteins, protein],
+      };
+    });
+  };
+
   const handleGenerate = async () => {
     if (loading) return;
 
@@ -102,6 +139,7 @@ export default function PlannerPage() {
         variety: form.variety,
         prep_time_preference: form.prep_time_preference,
         macro_preference: form.macro_preference,
+        favorite_proteins: form.favorite_proteins,
       };
 
       const res = await fetch(`${API_BASE}/generate-plan`, {
@@ -168,11 +206,8 @@ export default function PlannerPage() {
       if (!res.ok || data?.status !== "ok") {
         throw new Error(data?.detail || "Failed to save plan");
       }
-
-      
     } catch (error) {
       console.error(error);
-      
     }
   };
 
@@ -199,6 +234,7 @@ export default function PlannerPage() {
         variety: form.variety,
         prep_time_preference: form.prep_time_preference,
         macro_preference: form.macro_preference,
+        favorite_proteins: form.favorite_proteins,
         day: activeDay,
         slot,
         target_meal_calories: Number(target),
@@ -395,6 +431,7 @@ export default function PlannerPage() {
                   }
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
                 >
+                  <option value="vegan">Vegan</option>
                   <option value="vegetarian">Vegetarian</option>
                   <option value="non-vegetarian">Non-vegetarian</option>
                 </select>
@@ -457,6 +494,34 @@ export default function PlannerPage() {
                   <option value="lower_carb">Lower carb</option>
                 </select>
               </Field>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-slate-600">
+                Favorite proteins
+              </p>
+              <div className="max-h-52 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="grid grid-cols-1 gap-2">
+                  {PROTEIN_OPTIONS.map((protein) => (
+                    <label
+                      key={protein}
+                      className="flex items-center gap-2 text-sm text-slate-700"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.favorite_proteins.includes(protein)}
+                        onChange={() => toggleFavoriteProtein(protein)}
+                      />
+                      <span className="capitalize">{protein}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {form.favorite_proteins.length > 0 && (
+                <p className="text-xs text-slate-500">
+                  Selected: {form.favorite_proteins.length}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -540,7 +605,7 @@ export default function PlannerPage() {
                       onClick={handleSavePlan}
                       className="mt-3 px-5 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition"
                     >
-                       Save Plan
+                      Save Plan
                     </button>
                   )}
                 </div>
@@ -755,6 +820,12 @@ function MealCard({
           <p className="text-xs text-slate-500 mt-1">
             ⏱ Prep time: {meal.minutes} min
           </p>
+
+          {meal.main_protein && (
+            <p className="text-xs text-slate-500 mt-1 capitalize">
+              Main protein: {meal.main_protein}
+            </p>
+          )}
 
           {preference && (
             <div className="mt-3 flex flex-wrap gap-2">
