@@ -1,351 +1,406 @@
 "use client";
-"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { DM_Sans, Cormorant_Garamond } from "next/font/google";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "800"],
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+});
+
+type UserType = {
+  name?: string;
+  email?: string;
+} | null;
 
 export default function Landing() {
-
   const router = useRouter();
-
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserType>(null);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
-
     if (currentUser) {
       setUser(JSON.parse(currentUser));
     }
   }, []);
-  
-  
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-orange-50 text-slate-900 overflow-hidden">
-      {/* Ambient glows */}
-      <div className="pointer-events-none absolute -top-28 -left-28 h-96 w-96 rounded-full bg-rose-300/45 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-28 -right-28 h-[28rem] w-[28rem] rounded-full bg-orange-300/45 blur-3xl" />
+    <main
+      className={`${dmSans.className} min-h-screen bg-[#F7F6F3] text-[#171B34] overflow-x-hidden`}
+    >
+      
 
-      {/* TOP PROMO BANNER */}
-      <div className="relative z-10">
-        <div className="w-full bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 text-white">
-          <div className="mx-auto max-w-6xl px-5 py-2 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">
-                <span className="text-amber-200">⏳</span> Limited demo build
-              </span>
-              <span className="text-white/80">
-                Generate a plan in seconds • Replace meals • Beautiful summaries
-              </span>
-            </div>
-
-            <button
-              onClick={() => router.push("/planner")}
-              className="rounded-full bg-white text-slate-900 px-4 py-1.5 text-xs sm:text-sm font-extrabold hover:opacity-90 transition"
-            >
-              Try it now →
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative mx-auto max-w-6xl px-5 py-10 space-y-16">
-        {/* NAVBAR */}
-        <header className="flex items-center justify-between gap-3">
+      {/* navbar */}
+      <header className="sticky top-0 z-30 border-b border-black/5 bg-[#F7F6F3]/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-rose-600 to-orange-500 shadow-sm" />
             <div>
-              <p className="font-extrabold leading-tight">Smart Meal Planner</p>
-              <p className="text-xs text-slate-500 -mt-0.5">
-                AI-powered meal planning
+              <p className="text-[1.65rem] font-extrabold leading-none tracking-tight">
+                AI Meal Planner
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Personalized nutrition, beautifully simple
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-8 lg:flex">
             <button
               onClick={() =>
                 document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="hidden sm:inline-flex rounded-2xl px-4 py-2 border border-slate-200 bg-white font-semibold hover:border-rose-200 transition"
+              className="text-[1.05rem] font-semibold text-slate-600 transition hover:text-[#171B34]"
             >
-              How it works
+              How it Works
             </button>
 
             <button
               onClick={() =>
                 document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="hidden sm:inline-flex rounded-2xl px-4 py-2 border border-slate-200 bg-white font-semibold hover:border-rose-200 transition"
+              className="text-[1.05rem] font-semibold text-slate-600 transition hover:text-[#171B34]"
             >
               Features
             </button>
 
             {user ? (
-  <>
-    <button
-      onClick={() => router.push("/planner")}
-      className="rounded-2xl px-4 py-2 bg-gray-200 font-semibold hover:bg-gray-300 transition"
-    >
-      My Planner
-    </button>
+              <>
+                <button
+                  onClick={() => router.push("/planner")}
+                  className="text-[1.05rem] font-semibold text-slate-600 transition hover:text-[#171B34]"
+                >
+                  My Planner
+                </button>
 
-    <button
-      onClick={() => router.push("/saved-plans")}
-      className="rounded-2xl px-4 py-2 bg-gray-200 font-semibold hover:bg-gray-300 transition"
-    >
-      Saved Plans
-    </button>
+                <button
+                  onClick={() => router.push("/saved-plans")}
+                  className="text-[1.05rem] font-semibold text-slate-600 transition hover:text-[#171B34]"
+                >
+                  Saved Plans
+                </button>
 
-    <button
-      onClick={() => {
-        localStorage.removeItem("currentUser");
-        window.location.reload();
-      }}
-      className="rounded-2xl px-4 py-2 bg-red-500 text-white font-bold hover:opacity-90 transition"
-    >
-      Logout
-    </button>
-  </>
-) : (
-  <>
-    <button
-      onClick={() => router.push("/login")}
-      className="rounded-2xl px-4 py-2 border border-slate-200"
-    >
-      Login
-    </button>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("currentUser");
+                    window.location.reload();
+                  }}
+                  className="rounded-full bg-[#171B34] px-5 py-2.5 font-bold text-white transition hover:opacity-92"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => router.push("/login")}
+                  className="text-[1.05rem] font-bold text-[#171B34] transition hover:opacity-75"
+                >
+                  Login
+                </button>
 
-    <button
-      onClick={() => router.push("/planner")}
-      className="rounded-2xl px-4 py-2 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
-    >
-      Create plan →
-    </button>
-  </>
-)}
+                <button
+                  onClick={() => router.push("/planner")}
+                  className="rounded-full bg-[#6E63F6] px-6 py-3 font-extrabold text-white shadow-[0_12px_30px_rgba(110,99,246,0.22)] transition hover:opacity-92"
+                >
+                  Create plan →
+                </button>
+              </>
+            )}
           </div>
-        </header>
 
-        {/* HERO */}
-        <section className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] items-center">
-          {/* LEFT */}
-          <div className="space-y-6 animate-fadeUp">
-            <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-4 py-2 shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-rose-500" />
-              <p className="text-xs sm:text-sm font-extrabold text-rose-700">
-                AI-Powered Nutrition Planning
-              </p>
+          {/* mobile actions */}
+          <div className="flex items-center gap-2 lg:hidden">
+            {user ? (
+              <>
+                <button
+                  onClick={() => router.push("/planner")}
+                  className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                >
+                  My Planner
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("currentUser");
+                    window.location.reload();
+                  }}
+                  className="rounded-full bg-[#171B34] px-4 py-2 text-sm font-bold text-white"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => router.push("/login")}
+                  className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => router.push("/planner")}
+                  className="rounded-full bg-[#6E63F6] px-4 py-2 text-sm font-extrabold text-white"
+                >
+                  Plan →
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-5">
+        {/* hero */}
+        <section className="grid gap-14 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
+          {/* left */}
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center rounded-full border border-[#DDD8F9] bg-white px-4 py-2 text-sm font-semibold text-[#6E63F6] shadow-sm">
+              AI-powered nutrition planning
             </div>
 
-            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
-              Eat Smart.{" "}
-              <span className="bg-gradient-to-r from-rose-600 to-orange-500 bg-clip-text text-transparent">
+            <h1 className="mt-8 text-5xl font-extrabold leading-[0.96] tracking-[-0.04em] text-[#171B34] sm:text-6xl lg:text-7xl">
+              Eat Fresh.
+              <span
+                className={`mt-1 block font-medium italic text-[#5B5F86] ${cormorant.className}`}
+              >
                 Live Better.
               </span>
             </h1>
 
-            <p className="text-lg text-slate-600 max-w-xl">
-              Build a personalized meal plan around your goals: calories, diet, allergies,
-              and preferences. Our system generates a structured plan you can actually follow,
-              with balanced meals and a clear nutrition breakdown.
+            <p className="mt-8 max-w-xl text-xl leading-9 text-[#667085] sm:text-2xl sm:leading-10">
+              Create your personalized weekly menu around your goals, taste,
+              schedule, and lifestyle.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
                 onClick={() => router.push("/planner")}
-                className="rounded-2xl px-8 py-4 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold shadow-lg hover:opacity-95 hover:scale-[1.01] transition"
+                className="rounded-2xl bg-[#6E63F6] px-8 py-4 text-lg font-extrabold text-white shadow-[0_12px_32px_rgba(110,99,246,0.22)] transition hover:opacity-92"
               >
                 Create Your Plan →
               </button>
 
               <button
                 onClick={() => router.push("/meal-plan")}
-                className="rounded-2xl px-8 py-4 border border-slate-200 bg-white font-bold hover:border-rose-200 transition"
+                className="rounded-2xl border border-slate-300 bg-white px-8 py-4 text-lg font-bold text-[#171B34] transition hover:bg-slate-50"
               >
                 View last plan
               </button>
+
               <button
                 onClick={() => router.push("/calorie-calculator")}
-               className="rounded-2xl px-8 py-4 border border-slate-200 bg-white font-bold hover:border-rose-200 transition"
+                className="rounded-2xl border border-slate-300 bg-white px-8 py-4 text-lg font-bold text-[#171B34] transition hover:bg-slate-50"
               >
                 Calorie Calculator
               </button>
-              
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-2">
-              <Tag>Goal-based ranking</Tag>
-              <Tag>Diet & allergies</Tag>
+            <div className="mt-8 flex flex-wrap gap-2">
+              <Tag>Personalized</Tag>
               <Tag>Replace meals</Tag>
-              <Tag>Explainable rules</Tag>
-              <Tag>Fast generation</Tag>
+              <Tag>Diet-aware</Tag>
+              <Tag>Balanced calories</Tag>
             </div>
 
-            {/* trust-ish row */}
-            <div className="flex flex-wrap items-center gap-3 pt-3 text-sm text-slate-500">
-              <div className="flex -space-x-2">
-                <Avatar />
-                <Avatar />
-                <Avatar />
-                <Avatar />
+            <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-slate-500 sm:text-base">
+              <div className="flex -space-x-3">
+                <Avatar img="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" />
+                <Avatar img="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop" />
+                <Avatar img="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400&auto=format&fit=crop" />
               </div>
-              <span className="font-semibold text-slate-700">4.8</span>
-              <Stars />
-              <span>Designed for consistency, not guesswork</span>
+              <span>
+                Trusted by <span className="font-bold text-[#171B34]">24,000+</span>{" "}
+                food lovers
+              </span>
             </div>
           </div>
 
-          {/* RIGHT */}
-          <div className="relative flex justify-center animate-fadeUp">
-            {/* Big image circle */}
-            <div className="relative w-[380px] h-[380px] rounded-[36px] overflow-hidden shadow-2xl border border-white bg-white">
+          {/* right */}
+          <div className="relative flex items-center justify-center">
+            <div className="absolute right-0 top-0 hidden h-[540px] w-[540px] rounded-[42px] bg-[#ECE9FF] lg:block" />
+
+            <div className="relative z-10 h-[420px] w-full max-w-[520px] overflow-hidden rounded-[40px] bg-white shadow-[0_28px_80px_rgba(23,27,52,0.10)] ring-1 ring-black/5 sm:h-[500px] lg:h-[620px]">
               <img
-                src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80"
-                alt="Healthy meal"
-                className="object-cover w-full h-full"
+                src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400&q=80"
+                alt="Healthy premium meal"
+                className="h-full w-full object-cover"
               />
-              {/* overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-rose-600/10 via-transparent to-orange-500/10" />
             </div>
 
-            {/* Floating badges */}
-            <FloatCard className="-top-6 -left-6" emoji="🔥" title="Calories" value="Perfectly balanced" />
-            <FloatCard className="top-10 -right-8" emoji="🥑" title="Diet" value="Personalized to you" />
-            <FloatCard className="bottom-6 -right-6" emoji="⚡" title="Speed" value="Generated in seconds" />
+            <HeroCard
+              className="right-4 top-6 sm:right-0 sm:top-10"
+              title="CALORIES"
+              value="Perfectly Balanced"
+              emoji="🔥"
+            />
 
-            {/* Glow */}
-            <div className="absolute -z-10 w-[460px] h-[460px] bg-gradient-to-r from-rose-200 to-orange-200 blur-3xl rounded-full opacity-70"></div>
+            <HeroCard
+              className="-left-2 bottom-10 sm:-left-10"
+              title="INGREDIENTS"
+              value="Fresh & colorful"
+              emoji="🥗"
+            />
           </div>
         </section>
 
-        {/* LOGO STRIP */}
-        <section className="space-y-4">
-          <p className="text-xs text-slate-500 font-semibold tracking-wide">
-            BUILT WITH MODERN STACK
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <MiniLogo>Next.js</MiniLogo>
-            <MiniLogo>FastAPI</MiniLogo>
-            <MiniLogo>Pandas</MiniLogo>
-            <MiniLogo>Tailwind</MiniLogo>
-            <MiniLogo>Rule-based AI</MiniLogo>
-            <MiniLogo>Content ranking</MiniLogo>
+        {/* three highlights */}
+        <section className="grid gap-5 py-4 md:grid-cols-3">
+          <HighlightCard
+            title="Set your targets"
+            text="Calories, meals per day, goal, allergies, and food preferences."
+          />
+          <HighlightCard
+            title="Get your plan"
+            text="A clean weekly structure with balanced meals and smart variety."
+          />
+          <HighlightCard
+            title="Refine anytime"
+            text="Replace meals in one click without losing your plan logic."
+          />
+        </section>
+
+        {/* how it works */}
+        <section id="how" className="py-16 md:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-4xl font-extrabold tracking-[-0.04em] text-[#171B34] sm:text-5xl md:text-6xl">
+              Smart eating in 3 steps
+            </h2>
+            <p className="mt-5 text-xl leading-9 text-[#667085] sm:text-2xl">
+              We handle the planning, counting, and organizing. You just enjoy
+              the food.
+            </p>
           </div>
-        </section>
 
-        {/* PROBLEM / SOLUTION */}
-        <section className="grid gap-4 md:grid-cols-3">
-          <InfoCard
-            title="The problem"
-            desc="Planning meals takes time and mental energy — balancing calories, diet preferences, allergies, and nutrition can feel overwhelming."
-            icon={<IconBolt />}
-          />
-          <InfoCard
-            title="What happens"
-            desc="People default to fast food or repetitive meals that don’t match their goals because decisions become too costly."
-            icon={<IconLoop />}
-          />
-          <InfoCard
-            title="Our solution"
-            desc="A structured meal plan generated from your inputs, with clear totals and the option to replace meals for better fit."
-            icon={<IconSpark />}
-          />
-        </section>
+          <div className="mt-14 grid gap-6 lg:grid-cols-3">
+            <StepCard
+              number="1"
+              title="Set your goals"
+              text="Tell us what you like to eat and what you want to achieve. We adapt to preferences, diets, and allergies."
+            />
+            <StepCard
+              number="2"
+              title="Get your plan"
+              text="Receive a complete plan with delicious meals, balanced calories, and structure you can actually follow."
+            />
+            <StepCard
+              number="3"
+              title="Cook & stay consistent"
+              text="Follow your meals, swap options when needed, and keep progress simple."
+            />
+          </div>
 
-        {/* HOW IT WORKS */}
-        <section id="how" className="space-y-6">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="text-3xl font-extrabold">How it works</h2>
+          <div className="mt-10 flex justify-center">
             <button
               onClick={() => router.push("/planner")}
-              className="rounded-2xl px-5 py-3 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
+              className="rounded-full bg-[#6E63F6] px-8 py-4 text-lg font-extrabold text-white shadow-[0_12px_32px_rgba(110,99,246,0.22)] transition hover:opacity-92"
             >
               Start →
             </button>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <Step
-              idx="01"
-              title="Set your targets"
-              desc="Choose calories, meals/day, days, diet type, goal, and allergies."
-            />
-            <Step
-              idx="02"
-              title="AI filtering + ranking"
-              desc="We filter foods by constraints and rank options based on your goal."
-            />
-            <Step
-              idx="03"
-              title="Generate + refine"
-              desc="Get your plan with totals, then replace meals anytime for variety."
-            />
-          </div>
         </section>
 
-        {/* FEATURES */}
-        <section id="features" className="space-y-6">
-          <h2 className="text-3xl font-extrabold">Features built for real life</h2>
+        {/* benefits */}
+        <section
+          id="features"
+          className="grid gap-12 py-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center"
+        >
+          <div className="relative min-h-[420px]">
+            <div className="absolute left-0 top-0 h-56 w-72 overflow-hidden rounded-[32px] shadow-xl sm:h-64 sm:w-80">
+              <img
+                src="https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1200&auto=format&fit=crop"
+                alt="Healthy meal one"
+                className="h-full w-full object-cover"
+              />
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Feature
-              title="Structured plans"
-              desc="Daily or multi-day planning with clear meal breakdowns and totals."
-              emoji="📅"
-            />
-            <Feature
-              title="Goal-aligned ranking"
-              desc="Different scoring depending on your objective (lose, maintain, gain)."
-              emoji="🎯"
-            />
-            <Feature
-              title="Diet + allergy constraints"
-              desc="Respect preferences and filter known allergens by ingredient hints."
-              emoji="🧠"
-            />
-            <Feature
-              title="Replace meals"
-              desc="One click to regenerate a meal while keeping the same constraints."
-              emoji="🔁"
-            />
-          </div>
-        </section>
+            <div className="absolute left-28 top-28 h-64 w-80 overflow-hidden rounded-[32px] shadow-xl sm:left-36 sm:h-72 sm:w-96">
+              <img
+                src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1200&auto=format&fit=crop"
+                alt="Healthy meal two"
+                className="h-full w-full object-cover"
+              />
+            </div>
 
-        {/* FINAL CTA */}
-        <section className="relative overflow-hidden rounded-[32px] border bg-white/75 backdrop-blur p-8 shadow-sm">
-          <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-fuchsia-300/35 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-amber-300/35 blur-3xl" />
-
-          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-extrabold">
-                Create your meal plan in under a minute.
-              </h3>
-              <p className="text-slate-600 max-w-2xl">
-                No more stress. No more guessing. Just a clean plan tailored to your inputs —
-                with simple controls to refine it.
+            <div className="absolute left-24 top-24 rounded-[28px] bg-white px-8 py-5 shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
+              <p className="text-4xl font-extrabold text-[#171B34]">1000+</p>
+              <p className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+                meal ideas
               </p>
             </div>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => router.push("/planner")}
-                className="rounded-2xl px-8 py-4 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 transition"
-              >
-                Generate now →
-              </button>
-              <button
-                onClick={() => router.push("/meal-plan")}
-                className="rounded-2xl px-8 py-4 border border-slate-200 bg-white font-bold hover:border-rose-200 transition"
-              >
-                View last plan
-              </button>
+          <div className="max-w-2xl">
+            <h2 className="text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#171B34] sm:text-5xl md:text-6xl">
+              Not just a diet.
+              <br />
+              A lifestyle upgrade.
+            </h2>
+
+            <div className="mt-10 space-y-8">
+              <Benefit
+                title="Fresh ingredients"
+                text="Cleaner, more colorful meals that feel enjoyable, not restrictive."
+              />
+              <Benefit
+                title="Save time"
+                text="Stop wondering what to eat. Your structure is ready in seconds."
+              />
+              <Benefit
+                title="Sustainable results"
+                text="Balanced eating that helps you stay consistent without extremes."
+              />
             </div>
           </div>
         </section>
 
-        <footer className="text-xs text-slate-500">
+        {/* action strip */}
+        <section className="py-16 md:py-20">
+          <div className="rounded-[40px] bg-[#171B34] px-8 py-12 text-white shadow-[0_25px_70px_rgba(23,27,52,0.18)] md:px-12 md:py-16">
+            <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+              <div className="max-w-3xl">
+                <h3 className="text-3xl font-extrabold tracking-[-0.04em] sm:text-4xl md:text-5xl">
+                  Build a meal plan that actually fits your life
+                </h3>
+                <p className="mt-4 text-lg leading-8 text-white/70 sm:text-xl">
+                  Personalized, elegant, and easy to follow.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  onClick={() => router.push("/planner")}
+                  className="rounded-full bg-[#6E63F6] px-8 py-4 text-lg font-extrabold text-white transition hover:opacity-92"
+                >
+                  Create Your Plan
+                </button>
+
+                {!user ? (
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="rounded-full border border-white/20 px-8 py-4 text-lg font-bold text-white transition hover:bg-white/10"
+                  >
+                    Login
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push("/saved-plans")}
+                    className="rounded-full border border-white/20 px-8 py-4 text-lg font-bold text-white transition hover:bg-white/10"
+                  >
+                    Saved Plans
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer className="pb-10 text-xs text-slate-500">
           COMP385 — AI-Based Smart Meal Planner (Group Project)
         </footer>
       </div>
@@ -353,150 +408,109 @@ export default function Landing() {
   );
 }
 
-/*  UI components */
+/* UI */
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full bg-rose-100 text-rose-800 px-3 py-1 text-xs font-semibold">
+    <span className="rounded-full border border-[#DDD8F9] bg-white px-3 py-1 text-xs font-semibold text-[#5B5F86] shadow-sm">
       {children}
     </span>
   );
 }
 
-function MiniLogo({ children }: { children: React.ReactNode }) {
+function Avatar({ img }: { img: string }) {
   return (
-    <span className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">
-      {children}
-    </span>
+    <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-[#F7F6F3] shadow-sm">
+      <img src={img} alt="User avatar" className="h-full w-full object-cover" />
+    </div>
   );
 }
 
-function Avatar() {
-  return (
-    <div className="h-8 w-8 rounded-full border-2 border-white bg-gradient-to-br from-rose-600 to-orange-500 shadow-sm" />
-  );
-}
-
-function Stars() {
-  return (
-    <span className="text-amber-400 tracking-tight">
-      ★★★★☆
-    </span>
-  );
-}
-
-function FloatCard({
+function HeroCard({
   className,
-  emoji,
   title,
   value,
+  emoji,
 }: {
   className: string;
-  emoji: string;
   title: string;
   value: string;
+  emoji: string;
 }) {
   return (
     <div
-      className={`absolute ${className} bg-white/90 backdrop-blur rounded-2xl shadow-xl px-4 py-3 border border-slate-100`}
+      className={`absolute z-20 rounded-[28px] bg-white px-5 py-4 shadow-[0_20px_40px_rgba(0,0,0,0.08)] ${className}`}
     >
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center text-lg">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F0FF] text-xl">
           {emoji}
         </div>
         <div>
-          <p className="text-xs font-bold text-slate-500">{title}</p>
-          <p className="text-sm font-extrabold text-slate-900">{value}</p>
+          <p className="text-sm font-bold uppercase tracking-[0.14em] text-slate-400">
+            {title}
+          </p>
+          <p className="text-xl font-extrabold text-[#171B34]">{value}</p>
         </div>
       </div>
     </div>
   );
 }
 
-function InfoCard({
+function HighlightCard({
   title,
-  desc,
-  icon,
+  text,
 }: {
   title: string;
-  desc: string;
-  icon: React.ReactNode;
+  text: string;
 }) {
   return (
-    <div className="rounded-3xl border border-rose-100 bg-white/80 backdrop-blur p-6 shadow-[0_10px_30px_rgba(244,63,94,0.06)]">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-rose-600 to-orange-500 text-white flex items-center justify-center">
-          {icon}
-        </div>
-        <p className="font-extrabold">{title}</p>
-      </div>
-      <p className="text-sm text-slate-600 mt-3">{desc}</p>
+    <div className="rounded-[28px] border border-black/6 bg-white p-7 shadow-[0_10px_30px_rgba(23,27,52,0.04)]">
+      <p className="text-xl font-extrabold text-[#171B34]">{title}</p>
+      <p className="mt-3 text-[1.05rem] leading-8 text-[#667085]">{text}</p>
     </div>
   );
 }
 
-function Step({ idx, title, desc }: { idx: string; title: string; desc: string }) {
+function StepCard({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
   return (
-    <div className="rounded-3xl border border-rose-100 bg-white/80 backdrop-blur p-6 shadow-[0_10px_30px_rgba(244,63,94,0.08)]">
-      <div className="flex items-baseline justify-between">
-        <p className="text-sm font-extrabold">{title}</p>
-        <span className="text-xs font-extrabold text-rose-600">{idx}</span>
+    <div className="rounded-[32px] border border-black/6 bg-white p-8 shadow-[0_10px_30px_rgba(23,27,52,0.04)]">
+      <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-[#5B5F86] text-4xl font-extrabold text-white shadow-lg">
+        {number}
       </div>
-      <p className="text-sm text-slate-600 mt-2">{desc}</p>
+      <h3 className="mt-8 text-3xl font-extrabold tracking-[-0.03em] text-[#171B34]">
+        {title}
+      </h3>
+      <p className="mt-4 text-xl leading-9 text-[#667085]">{text}</p>
     </div>
   );
 }
 
-function Feature({ title, desc, emoji }: { title: string; desc: string; emoji: string }) {
+function Benefit({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex gap-4">
-      <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-rose-600 to-orange-500 text-white flex items-center justify-center text-xl">
-        {emoji}
+    <div className="flex gap-5">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#EEF0FF] text-2xl text-[#6E63F6]">
+        ✓
       </div>
       <div>
-        <p className="font-extrabold">{title}</p>
-        <p className="text-sm text-slate-600 mt-1">{desc}</p>
+        <h3 className="text-3xl font-extrabold tracking-[-0.03em] text-[#171B34]">
+          {title}
+        </h3>
+        <p className="mt-2 text-xl leading-9 text-[#667085]">{text}</p>
       </div>
     </div>
-  );
-}
-
-
-
-function IconBolt() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M13 2L3 14h8l-1 8 11-14h-8l0-6z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-function IconLoop() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-function IconSpark() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 2l1.5 6L20 10l-6.5 2L12 18l-1.5-6L4 10l6.5-2L12 2z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
