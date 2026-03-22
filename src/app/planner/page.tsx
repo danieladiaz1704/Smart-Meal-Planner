@@ -2,6 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Manrope } from "next/font/google";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
 const REQUEST_TIMEOUT_MS = 15000;
@@ -26,13 +32,10 @@ const PROTEIN_OPTIONS = [
   "Whey protein powder",
 ] as const;
 
-const MEAL_TYPE_OPTIONS = ["breakfast", "lunch", "dinner", "snack"] as const;
-
 type DietType = "vegan" | "vegetarian" | "non-vegetarian";
 type GoalType = "lose_weight" | "maintain" | "gain_muscle";
 type PrepTimePreference = "any" | "quick" | "moderate";
 type MacroPreference = "balanced" | "high_protein" | "high_carb" | "lower_carb";
-type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
 function toCsvList(value: string): string[] {
   return value
@@ -68,10 +71,7 @@ export default function PlannerPage() {
     prep_time_preference: "any" as PrepTimePreference,
     macro_preference: "balanced" as MacroPreference,
     favorite_proteins: [] as string[],
-    likes: "",
     dislikes: "",
-    favorite_meal_types: [] as MealType[],
-    preferred_prep_time: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -105,18 +105,6 @@ export default function PlannerPage() {
     });
   };
 
-  const toggleFavoriteMealType = (mealType: MealType) => {
-    setForm((prev) => {
-      const exists = prev.favorite_meal_types.includes(mealType);
-      return {
-        ...prev,
-        favorite_meal_types: exists
-          ? prev.favorite_meal_types.filter((m) => m !== mealType)
-          : [...prev.favorite_meal_types, mealType],
-      };
-    });
-  };
-
   const buildPayload = () => ({
     calories: Number(form.calories),
     meals_per_day: Number(form.meals_per_day),
@@ -129,12 +117,10 @@ export default function PlannerPage() {
     prep_time_preference: form.prep_time_preference,
     macro_preference: form.macro_preference,
     favorite_proteins: form.favorite_proteins,
-    likes: toCsvList(form.likes),
+    likes: [],
     dislikes: toCsvList(form.dislikes),
-    favorite_meal_types: form.favorite_meal_types,
-    preferred_prep_time: form.preferred_prep_time
-      ? Number(form.preferred_prep_time)
-      : null,
+    favorite_meal_types: [],
+    preferred_prep_time: null,
   });
 
   const handleGenerate = async () => {
@@ -188,270 +174,329 @@ export default function PlannerPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-orange-50 text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-rose-200/40 to-transparent" />
-
-      <div className="relative mx-auto max-w-4xl px-5 py-8">
-        <div className="mb-6 flex items-center justify-between gap-3">
+    <main className={`${manrope.className} min-h-screen bg-[#F7F6F3] text-[#171B34]`}>
+      <div className="mx-auto max-w-6xl px-5 py-8 md:py-10">
+        <div className="mb-8 flex items-center justify-between gap-4">
           <button
             onClick={() => router.push("/")}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-2 font-semibold hover:border-rose-200 transition"
+            className="rounded-full border border-[#D9D7F4] bg-white px-5 py-3 text-sm font-extrabold text-[#171B34] shadow-[0_8px_24px_rgba(23,27,52,0.05)] transition hover:bg-[#F4F3FF]"
           >
             ← Back
           </button>
 
-          <div className="hidden sm:flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-4 py-2 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-rose-500" />
-            <p className="text-sm font-semibold text-rose-700">Smart Meal Planner</p>
+          <div className="hidden items-center gap-3 rounded-full border border-[#DDD8F9] bg-white px-5 py-2.5 shadow-[0_8px_24px_rgba(23,27,52,0.05)] sm:flex">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#6E63F6]" />
+            <p className="text-sm font-extrabold tracking-[-0.01em] text-[#3D4466]">
+              Smart Meal Planner
+            </p>
           </div>
         </div>
 
-        <section className="rounded-3xl border border-slate-200 bg-white/85 backdrop-blur p-6 shadow-sm space-y-5">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-extrabold">Generate your plan</h1>
-            <p className="text-sm text-slate-600">
-              Answer the questions and we’ll generate your personalized meal plan.
-            </p>
-          </div>
+        <section className="overflow-hidden rounded-[36px] border border-[#E3E0F7] bg-white shadow-[0_24px_80px_rgba(23,27,52,0.08)]">
+          <div className="border-b border-[#ECE9FA] bg-[linear-gradient(180deg,#F5F2FF_0%,#FFFFFF_100%)] px-6 py-8 md:px-8 md:py-9">
+            <div className="max-w-3xl">
+              <p className="mb-4 inline-flex rounded-full border border-[#D9D7F4] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6] shadow-sm">
+                Personalized planner
+              </p>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Calories per day">
-              <input
-                type="number"
-                value={form.calories}
-                onChange={(e) =>
-                  setForm({ ...form, calories: Number(e.target.value) })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-              />
-            </Field>
+              <h1 className="text-4xl font-extrabold tracking-[-0.05em] text-[#171B34] md:text-5xl">
+                Generate your plan
+              </h1>
 
-            <Field label="Meals per day (1–6)">
-              <input
-                type="number"
-                value={form.meals_per_day}
-                onChange={(e) =>
-                  setForm({ ...form, meals_per_day: Number(e.target.value) })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-              />
-            </Field>
-
-            <Field label="Days (1–14)">
-              <input
-                type="number"
-                value={form.days}
-                onChange={(e) =>
-                  setForm({ ...form, days: Number(e.target.value) })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-              />
-            </Field>
-
-            <Field label="Diet type">
-              <select
-                value={form.diet_type}
-                onChange={(e) =>
-                  setForm({ ...form, diet_type: e.target.value as DietType })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
-              >
-                <option value="vegan">Vegan</option>
-                <option value="vegetarian">Vegetarian</option>
-                <option value="non-vegetarian">Non-vegetarian</option>
-              </select>
-            </Field>
-
-            <Field label="Goal">
-              <select
-                value={form.goal}
-                onChange={(e) =>
-                  setForm({ ...form, goal: e.target.value as GoalType })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
-              >
-                <option value="lose_weight">Lose weight</option>
-                <option value="maintain">Maintain</option>
-                <option value="gain_muscle">Gain muscle</option>
-              </select>
-            </Field>
-
-            <Field label="Allergies (comma separated)">
-              <input
-                type="text"
-                value={form.allergies}
-                onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-                placeholder="nuts, dairy"
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-              />
-            </Field>
-
-            <Field label="Prep time preference">
-              <select
-                value={form.prep_time_preference}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    prep_time_preference: e.target.value as PrepTimePreference,
-                  })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
-              >
-                <option value="any">Any</option>
-                <option value="quick">Quick meals</option>
-                <option value="moderate">Moderate</option>
-              </select>
-            </Field>
-
-            <Field label="Macro preference">
-              <select
-                value={form.macro_preference}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    macro_preference: e.target.value as MacroPreference,
-                  })
-                }
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 bg-white"
-              >
-                <option value="balanced">Balanced</option>
-                <option value="high_protein">High protein</option>
-                <option value="high_carb">High carb</option>
-                <option value="lower_carb">Lower carb</option>
-              </select>
-            </Field>
-          </div>
-
-          <Field label="Likes (comma separated)">
-            <input
-              type="text"
-              value={form.likes}
-              onChange={(e) => setForm({ ...form, likes: e.target.value })}
-              placeholder="salmon, avocado, rice"
-              className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-            />
-          </Field>
-
-          <Field label="Dislikes (comma separated)">
-            <input
-              type="text"
-              value={form.dislikes}
-              onChange={(e) => setForm({ ...form, dislikes: e.target.value })}
-              placeholder="tofu, mushrooms"
-              className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-            />
-          </Field>
-
-          <Field label="Preferred prep time (minutes)">
-            <input
-              type="number"
-              min={1}
-              max={180}
-              value={form.preferred_prep_time}
-              onChange={(e) =>
-                setForm({ ...form, preferred_prep_time: e.target.value })
-              }
-              placeholder="15"
-              className="w-full rounded-2xl border border-slate-200 px-4 py-3"
-            />
-          </Field>
-
-          <div className="space-y-2">
-            <p className="text-xs font-bold text-slate-600">Favorite meal types</p>
-            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-3">
-              {MEAL_TYPE_OPTIONS.map((mealType) => (
-                <label
-                  key={mealType}
-                  className="flex items-center gap-2 text-sm text-slate-700"
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.favorite_meal_types.includes(mealType)}
-                    onChange={() => toggleFavoriteMealType(mealType)}
-                  />
-                  <span className="capitalize">{mealType}</span>
-                </label>
-              ))}
+              <p className="mt-3 max-w-2xl text-[17px] font-medium leading-8 text-[#535B7A] md:text-[18px]">
+                Build a meal plan around your goals, food preferences, allergies,
+                and routine with a cleaner, more personalized experience.
+              </p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-xs font-bold text-slate-600">Favorite proteins</p>
-            <div className="max-h-52 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3">
-              <div className="grid grid-cols-1 gap-2">
-                {PROTEIN_OPTIONS.map((protein) => (
-                  <label
-                    key={protein}
-                    className="flex items-center gap-2 text-sm text-slate-700"
-                  >
+          <div className="space-y-7 px-6 py-7 md:px-8 md:py-8">
+            <SectionHeader
+              eyebrow="Basics"
+              title="Your plan foundation"
+              desc="Set your calorie target, daily structure, and nutrition goal."
+            />
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <Field label="Calories per day">
+                <input
+                  type="number"
+                  value={form.calories}
+                  onChange={(e) =>
+                    setForm({ ...form, calories: Number(e.target.value) })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Meals per day (1–6)">
+                <input
+                  type="number"
+                  value={form.meals_per_day}
+                  onChange={(e) =>
+                    setForm({ ...form, meals_per_day: Number(e.target.value) })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Days (1–14)">
+                <input
+                  type="number"
+                  value={form.days}
+                  onChange={(e) =>
+                    setForm({ ...form, days: Number(e.target.value) })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Diet type">
+                <select
+                  value={form.diet_type}
+                  onChange={(e) =>
+                    setForm({ ...form, diet_type: e.target.value as DietType })
+                  }
+                  className={inputClass}
+                >
+                  <option value="vegan">Vegan</option>
+                  <option value="vegetarian">Vegetarian</option>
+                  <option value="non-vegetarian">Non-vegetarian</option>
+                </select>
+              </Field>
+
+              <Field label="Goal">
+                <select
+                  value={form.goal}
+                  onChange={(e) =>
+                    setForm({ ...form, goal: e.target.value as GoalType })
+                  }
+                  className={inputClass}
+                >
+                  <option value="lose_weight">Lose weight</option>
+                  <option value="maintain">Maintain</option>
+                  <option value="gain_muscle">Gain muscle</option>
+                </select>
+              </Field>
+
+              <Field label="Macro preference">
+                <select
+                  value={form.macro_preference}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      macro_preference: e.target.value as MacroPreference,
+                    })
+                  }
+                  className={inputClass}
+                >
+                  <option value="balanced">Balanced</option>
+                  <option value="high_protein">High protein</option>
+                  <option value="high_carb">High carb</option>
+                  <option value="lower_carb">Lower carb</option>
+                </select>
+              </Field>
+            </div>
+
+            <SectionHeader
+              eyebrow="Preferences"
+              title="Flavor and restrictions"
+              desc="Add allergies, dislikes, and prep-time preferences."
+            />
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <Field label="Allergies (comma separated)">
+                <input
+                  type="text"
+                  value={form.allergies}
+                  onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+                  placeholder="nuts, dairy"
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Prep time preference">
+                <select
+                  value={form.prep_time_preference}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      prep_time_preference: e.target.value as PrepTimePreference,
+                    })
+                  }
+                  className={inputClass}
+                >
+                  <option value="any">Any</option>
+                  <option value="quick">Quick meals</option>
+                  <option value="moderate">Moderate</option>
+                </select>
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5">
+              <Field label="Dislikes (comma separated)">
+                <input
+                  type="text"
+                  value={form.dislikes}
+                  onChange={(e) => setForm({ ...form, dislikes: e.target.value })}
+                  placeholder="tofu, mushrooms"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+
+            <SectionHeader
+              eyebrow="Personalization"
+              title="Protein choices"
+              desc="Select your favorite proteins so the recommendations feel more like you."
+            />
+
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-1">
+              <div className="rounded-[30px] border border-[#E5E2F8] bg-[#FBFAFF] p-5 shadow-[0_12px_30px_rgba(23,27,52,0.04)]">
+                <div className="mb-4">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6]">
+                    Planner modes
+                  </p>
+                  <h3 className="mt-2 text-xl font-extrabold tracking-[-0.03em] text-[#171B34]">
+                    Extra filters
+                  </h3>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 rounded-2xl border border-[#E6E5EF] bg-white px-4 py-4 text-sm font-bold text-[#171B34] shadow-sm">
                     <input
                       type="checkbox"
-                      checked={form.favorite_proteins.includes(protein)}
-                      onChange={() => toggleFavoriteProtein(protein)}
+                      checked={form.exclude_ultra_processed}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          exclude_ultra_processed: e.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 accent-[#6E63F6]"
                     />
-                    <span>{protein}</span>
+                    Exclude ultra-processed
                   </label>
-                ))}
+
+                  <label className="flex items-center gap-3 rounded-2xl border border-[#E6E5EF] bg-white px-4 py-4 text-sm font-bold text-[#171B34] shadow-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.variety}
+                      onChange={(e) =>
+                        setForm({ ...form, variety: e.target.checked })
+                      }
+                      className="h-4 w-4 accent-[#6E63F6]"
+                    />
+                    Variety mode
+                  </label>
+                </div>
               </div>
             </div>
+
+            <div className="rounded-[30px] border border-[#E5E2F8] bg-[#FBFAFF] p-5 shadow-[0_12px_30px_rgba(23,27,52,0.04)]">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6]">
+                    Protein picker
+                  </p>
+                  <h3 className="mt-2 text-xl font-extrabold tracking-[-0.03em] text-[#171B34]">
+                    Favorite proteins
+                  </h3>
+                </div>
+
+                <div className="rounded-full bg-white px-4 py-2 text-sm font-extrabold text-[#5B5F86] shadow-sm">
+                  {form.favorite_proteins.length} selected
+                </div>
+              </div>
+
+              <div className="max-h-72 overflow-y-auto rounded-[24px] border border-[#E6E5EF] bg-white p-3 shadow-inner">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {PROTEIN_OPTIONS.map((protein) => {
+                    const checked = form.favorite_proteins.includes(protein);
+
+                    return (
+                      <label
+                        key={protein}
+                        className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-bold transition ${
+                          checked
+                            ? "border-[#6E63F6] bg-[#F2F0FF] text-[#171B34] shadow-sm"
+                            : "border-[#E6E5EF] bg-white text-[#3D4466] hover:bg-[#F8F7FF]"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleFavoriteProtein(protein)}
+                          className="h-4 w-4 accent-[#6E63F6]"
+                        />
+                        <span>{protein}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {loading && (
+              <div className="rounded-[30px] border border-[#DDD8F9] bg-[#F6F4FF] p-5 shadow-[0_12px_30px_rgba(110,99,246,0.08)]">
+                <div className="mb-3 flex items-center justify-between text-sm font-extrabold text-[#4A4F78]">
+                  <span>Generating with AI…</span>
+                  <span>{progress}%</span>
+                </div>
+
+                <div className="h-4 w-full overflow-hidden rounded-full bg-white ring-1 ring-[#E2DFF8]">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#6E63F6_0%,#8D84FF_100%)] transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full rounded-[24px] bg-[linear-gradient(90deg,#6E63F6_0%,#847BFF_100%)] px-6 py-4 text-lg font-extrabold text-white shadow-[0_18px_36px_rgba(110,99,246,0.24)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? "Generating..." : "Generate Plan"}
+            </button>
+
+            {error && (
+              <div className="rounded-[24px] border border-[#E7C5CF] bg-[#FFF7FA] p-4 text-sm font-bold text-[#A33A5B]">
+                {error}
+              </div>
+            )}
           </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-semibold">
-              <input
-                type="checkbox"
-                checked={form.exclude_ultra_processed}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    exclude_ultra_processed: e.target.checked,
-                  })
-                }
-              />
-              Exclude ultra-processed
-            </label>
-
-            <label className="flex items-center gap-2 text-sm font-semibold">
-              <input
-                type="checkbox"
-                checked={form.variety}
-                onChange={(e) => setForm({ ...form, variety: e.target.checked })}
-              />
-              Variety mode
-            </label>
-          </div>
-
-          {loading && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-600">
-                <span>Generating with AI…</span>
-                <span>{progress}%</span>
-              </div>
-              <div className="h-3 w-full rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-rose-600 to-orange-500 transition-all"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          <button
-            onClick={handleGenerate}
-            disabled={loading}
-            className="w-full rounded-2xl px-6 py-4 bg-gradient-to-r from-rose-600 to-orange-500 text-white font-extrabold hover:opacity-95 disabled:opacity-60"
-          >
-            {loading ? "Generating..." : "Generate Plan"}
-          </button>
-
-          {error && (
-            <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-2xl">
-              {error}
-            </div>
-          )}
         </section>
       </div>
     </main>
+  );
+}
+
+const inputClass =
+  "w-full rounded-[20px] border border-[#D9D7F4] bg-white px-4 py-3.5 text-[15px] font-semibold text-[#171B34] shadow-[0_4px_18px_rgba(23,27,52,0.04)] outline-none transition placeholder:text-[#8A90A8] focus:border-[#6E63F6] focus:ring-4 focus:ring-[#6E63F6]/12";
+
+function SectionHeader({
+  eyebrow,
+  title,
+  desc,
+}: {
+  eyebrow: string;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="rounded-[28px] border border-[#E5E2F8] bg-[#FBFAFF] px-5 py-5 shadow-[0_10px_26px_rgba(23,27,52,0.04)]">
+      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6]">
+        {eyebrow}
+      </p>
+      <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[#171B34]">
+        {title}
+      </h2>
+      <p className="mt-2 max-w-2xl text-[15px] font-medium leading-7 text-[#535B7A]">
+        {desc}
+      </p>
+    </div>
   );
 }
 
@@ -463,8 +508,10 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1">
-      <p className="text-xs font-bold text-slate-600">{label}</p>
+    <div className="space-y-2.5">
+      <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-[#3D4466]">
+        {label}
+      </p>
       {children}
     </div>
   );
