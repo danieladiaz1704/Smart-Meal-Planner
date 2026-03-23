@@ -146,35 +146,76 @@ export default function MealPlanPage() {
     sessionStorage.setItem("mealPlanResult", JSON.stringify(next));
   };
 
+
   const handleSavePlan = async () => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-      if (!currentUser?.email || !result?.plan) {
-        alert("No plan to save");
-        return;
-      }
-
-      const res = await fetch(`${API_BASE}/save-plan`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: currentUser.email,
-          plan: result.plan,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data?.status !== "ok") {
-        throw new Error(data?.detail || "Failed to save plan");
-      }
-    } catch (err: any) {
-      setError(err?.message ?? "Failed to save plan");
+    if (!currentUser?.email || !result?.plan || !requestData) {
+      alert("No plan to save");
+      return;
     }
-  };
+
+    const res = await fetch(`${API_BASE}/save-plan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: currentUser.email,
+        plan: result.plan,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data?.status !== "ok") {
+      throw new Error(data?.detail || "Failed to save plan");
+    }
+
+    alert("Plan saved successfully!");
+
+    const feedbackRequests: Promise<Response>[] = [];
+
+    for (const day of result.plan.days || []) {
+      for (const meal of day.meals || []) {
+        feedbackRequests.push(
+          fetch(`${API_BASE}/feedback`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_email: currentUser.email,
+              meal_id: meal.recipe_id,
+              meal_name: meal.name,
+              meal_type: meal.meal_type,
+              diet_type: requestData.diet_type,
+              prep_time: meal.minutes,
+              calories: meal.calories,
+              protein: meal.protein_g,
+              carbs: meal.carbs_g,
+              fat: meal.fat_g,
+              main_protein: meal.main_protein || "other",
+              goal: requestData.goal,
+              prep_preference: requestData.prep_time_preference,
+              action: "saved",
+            }),
+          })
+        );
+      }
+    }
+
+    Promise.allSettled(feedbackRequests).then((results) => {
+      console.log("Feedback results:", results);
+    });
+
+  } catch (err: any) {
+    console.error("Save plan error:", err);
+    setError(err?.message ?? "Failed to save plan");
+  }
+};
+  
 
   const handleReplace = async (slot: string, target: number, currentRecipeId: number) => {
     if (!result?.plan || !activeDayObj || !requestData) return;

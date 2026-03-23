@@ -27,6 +27,7 @@ client = MongoClient(
 db = client["meal_planner_db"]
 users_collection = db["users"]
 plans_collection = db["plans"]
+feedback_collection = db["meal_feedback"]
 
 # -----------------------------
 # APP CONFIG
@@ -265,3 +266,30 @@ def delete_plan(data: dict):
     plans_collection.delete_one({"_id": plan_to_delete["_id"]})
 
     return {"status": "ok"}
+# -----------------------------
+# FEEDBACK API
+# -----------------------------
+@app.post("/feedback")
+def save_feedback(data: dict):
+    try:
+        feedback_collection.insert_one({
+            "user_email": data.get("user_email"),
+            "meal_id": data.get("meal_id"),
+            "meal_name": data.get("meal_name"),
+            "meal_type": data.get("meal_type"),
+            "diet_type": data.get("diet_type"),
+            "prep_time": data.get("prep_time"),
+            "calories": data.get("calories"),
+            "protein": data.get("protein"),
+            "carbs": data.get("carbs"),
+            "fat": data.get("fat"),
+            "main_protein": data.get("main_protein"),
+            "goal": data.get("goal"),
+            "prep_preference": data.get("prep_preference"),
+            "action": data.get("action"),
+        })
+
+        return {"status": "ok", "message": "Feedback saved successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
