@@ -16,6 +16,7 @@ _ING_DF: Optional[pd.DataFrame] = None
 _MEALS_DF: Optional[pd.DataFrame] = None
 _PREF_MODEL = None
 _PREF_LABEL_ENCODER = None
+_FEEDBACK_MODEL = None
 _META: Dict[str, Any] = {
     "loaded": False,
     "rows_loaded": {"ingredients": 0, "meals": 0},
@@ -235,7 +236,7 @@ def _detect_main_protein(items: List[Dict[str, Any]], ing_df: pd.DataFrame) -> s
 
 
 def init_datasets(data_dir: str) -> None:
-    global _ING_DF, _MEALS_DF, _META, _PREF_MODEL, _PREF_LABEL_ENCODER
+    global _ING_DF, _MEALS_DF, _META, _PREF_MODEL, _PREF_LABEL_ENCODER, _FEEDBACK_MODEL
 
     try:
         ing = pd.read_csv(f"{data_dir}/ingredients_db.csv", sep="\t")
@@ -269,6 +270,11 @@ def init_datasets(data_dir: str) -> None:
 
         _PREF_MODEL = joblib.load(model_path) if os.path.exists(model_path) else None
         _PREF_LABEL_ENCODER = joblib.load(encoder_path) if os.path.exists(encoder_path) else None
+
+        feedback_model_path = os.path.join(model_dir, "ML", "meal_model.pkl")
+        _FEEDBACK_MODEL = joblib.load(feedback_model_path) if os.path.exists(feedback_model_path) else None
+
+        
 
         _ING_DF = ing
         _MEALS_DF = meals
@@ -465,6 +471,25 @@ def _predict_meal_preference(
         "preference_score": round(pref_score, 4),
     }
 
+def _predict_feedback_preference(row: pd.Series) -> float:
+    if _FEEDBACK_MODEL is None:
+        return 0.0
+
+    try:
+        feature_row = pd.DataFrame([{
+            "calories": float(row["calories"]),
+            "protein": float(row["protein_g"]),
+            "carbs": float(row["carbs_g"]),
+            "fat": float(row["fat_g"]),
+        }])
+
+        # Probability of class 1 = "saved"
+        prob_saved = float(_FEEDBACK_MODEL.predict_proba(feature_row)[0][1])
+        return round(prob_saved, 4)
+
+    except Exception:
+        return 0.0
+
 
 def _macro_caps(slot: str, macro_preference: MacroPreference, strict: bool) -> Optional[float]:
     if macro_preference != "lower_carb":
@@ -591,6 +616,10 @@ def _pick_meal(
 
     pool["predicted_preference"] = ml_preds.apply(lambda x: x["predicted_preference"])
     pool["preference_score"] = ml_preds.apply(lambda x: x["preference_score"])
+    pool["feedback_score"] = pool.apply(
+    lambda r: _predict_feedback_preference(r),
+    axis=1,
+    )
     pool["favorite_protein_match"] = pool["main_protein"].apply(
         lambda x: _favorite_protein_match(x, favorite_proteins)
     )
@@ -624,6 +653,7 @@ def _pick_meal(
     pool["score"] = (
         pool["base_score"]
         + pool["preference_score"] * ml_weight
+        + pool["feedback_score"] * 40.0
         + pool["favorite_protein_match"] * 60.0
         + pool["likes_match"] * 35.0
         + pool["favorite_meal_type_match"] * 15.0
@@ -654,6 +684,7 @@ def _build_meal_payload(rec: Dict[str, Any], slot: str, target: float) -> Dict[s
         "sugar_g": round(float(rec.get("sugar_g", 0.0)), 1),
         "predicted_preference": str(rec.get("predicted_preference", "Unknown")),
         "preference_score": round(float(rec.get("preference_score", 0.0)), 4),
+        "feedback_score": round(float(rec.get("feedback_score", 0.0)), 4),
         "main_protein": str(rec.get("main_protein", "other")),
         "ingredients": rec["ingredients_names"],
         "diet_type": str(rec["diet_type"]),
