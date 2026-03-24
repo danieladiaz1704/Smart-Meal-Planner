@@ -220,6 +220,10 @@ export default function MealPlanPage() {
   const handleReplace = async (slot: string, target: number, currentRecipeId: number) => {
     if (!result?.plan || !activeDayObj || !requestData) return;
 
+    const oldMeal = (activeDayObj.meals ?? []).find(
+     (m) => (m.slot ?? m.meal_type) === slot && Number(m.recipe_id) === Number(currentRecipeId)
+    );
+
     setError(null);
 
     try {
@@ -265,6 +269,35 @@ export default function MealPlanPage() {
       }
 
       const newMeal: Meal = data.meal;
+
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+      if (currentUser?.email && oldMeal) {
+        fetch(`${API_BASE}/feedback`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_email: currentUser.email,
+            meal_id: oldMeal.recipe_id,
+            meal_name: oldMeal.name,
+            meal_type: oldMeal.meal_type,
+            diet_type: requestData.diet_type,
+            prep_time: oldMeal.minutes,
+            calories: oldMeal.calories,
+            protein: oldMeal.protein_g,
+            carbs: oldMeal.carbs_g,
+            fat: oldMeal.fat_g,
+            main_protein: oldMeal.main_protein || "other",
+            goal: requestData.goal,
+            prep_preference: requestData.prep_time_preference,
+            action: "replaced",
+          }),
+        }).catch((err) => {
+          console.error("Feedback for replaced meal failed:", err);
+        });
+      }
 
       const newDays = (result.plan.days ?? []).map((d) => {
         if (d.day !== activeDay) return d;
