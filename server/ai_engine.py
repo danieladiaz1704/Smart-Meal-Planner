@@ -267,14 +267,12 @@ def init_datasets(data_dir: str) -> None:
         model_dir = os.path.dirname(__file__)
         model_path = os.path.join(model_dir, "meal_preference_model.pkl")
         encoder_path = os.path.join(model_dir, "preference_label_encoder.pkl")
+        feedback_model_path = os.path.join(model_dir, "ML", "meal_model.pkl")
 
         _PREF_MODEL = joblib.load(model_path) if os.path.exists(model_path) else None
         _PREF_LABEL_ENCODER = joblib.load(encoder_path) if os.path.exists(encoder_path) else None
-
-        feedback_model_path = os.path.join(model_dir, "ML", "meal_model.pkl")
         _FEEDBACK_MODEL = joblib.load(feedback_model_path) if os.path.exists(feedback_model_path) else None
 
-        
 
         _ING_DF = ing
         _MEALS_DF = meals
@@ -483,8 +481,11 @@ def _predict_feedback_preference(row: pd.Series) -> float:
             "fat": float(row["fat_g"]),
         }])
 
-        # Probability of class 1 = "saved"
-        prob_saved = float(_FEEDBACK_MODEL.predict_proba(feature_row)[0][1])
+        probs = _FEEDBACK_MODEL.predict_proba(feature_row)[0]
+        classes = list(_FEEDBACK_MODEL.classes_)
+        saved_index = classes.index(1)
+        prob_saved = float(probs[saved_index])
+
         return round(prob_saved, 4)
 
     except Exception:
