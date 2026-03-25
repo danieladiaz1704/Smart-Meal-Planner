@@ -187,10 +187,10 @@ export default function Landing() {
               </button>
 
               <button
-                onClick={() => router.push("/meal-plan")}
+                onClick={() => router.push("/saved-plans")}
                 className="rounded-2xl border border-slate-300 bg-white px-8 py-4 text-lg font-bold text-[#171B34] transition hover:bg-slate-50"
               >
-                View last plan
+                Saved plans
               </button>
 
               <button

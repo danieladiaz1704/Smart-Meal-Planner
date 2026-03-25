@@ -42,7 +42,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("currentUser", JSON.stringify(data.user));
-      router.push("/planner");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {

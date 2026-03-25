@@ -107,6 +107,8 @@ export default function MealPlanPage() {
   const [result, setResult] = useState<PlanResponse | null>(null);
   const [activeDay, setActiveDay] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
+  const [planSaved, setPlanSaved] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -173,7 +175,9 @@ export default function MealPlanPage() {
       throw new Error(data?.detail || "Failed to save plan");
     }
 
-    alert("Plan saved successfully!");
+    setPlanSaved(true);
+
+    setShowSuccess(true);
 
     const feedbackRequests: Promise<Response>[] = [];
 
@@ -446,19 +450,29 @@ export default function MealPlanPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[340px] bg-[radial-gradient(circle_at_top_left,_rgba(228,92,67,0.14),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(22,32,58,0.08),_transparent_30%)]" />
 
       <div className="relative mx-auto max-w-7xl px-5 py-8 md:py-10">
+        
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <button
+         <div className="flex flex-wrap items-center gap-3">
+           <button
             onClick={() => router.push("/planner")}
             className="rounded-full border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
-          >
-            ← Edit questions
-          </button>
+            >
+              ← Edit questions
+            </button>
 
-          <div className="hidden items-center gap-2 rounded-full border border-[#F2D1C9] bg-white px-4 py-2 shadow-sm sm:flex">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#E45C43]" />
-            <p className="text-sm font-bold text-[#A54334]">Meal Plan Results</p>
+            <button
+             onClick={() => router.push("/")}
+             className="rounded-full border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
+            >
+             Home
+            </button>
+            </div>
+
+            <div className="hidden items-center gap-2 rounded-full border border-[#F2D1C9] bg-white px-4 py-2 shadow-sm sm:flex">
+           <span className="h-2.5 w-2.5 rounded-full bg-[#E45C43]" />
+             <p className="text-sm font-bold text-[#A54334]">Meal Plan Results</p>
+             </div>
           </div>
-        </div>
 
         {error && (
           <div className="mb-4 rounded-2xl border border-[#F0C7CF] bg-[#FFF7FA] p-4 text-sm font-semibold text-[#A33A5B]">
@@ -485,12 +499,23 @@ export default function MealPlanPage() {
                     Review each meal, replace what you do not like, and save the plan when it feels right.
                   </p>
 
+                  <div className="mt-5 flex flex-wrap gap-3">
                   <button
                     onClick={handleSavePlan}
-                    className="mt-5 rounded-2xl bg-[#E45C43] px-5 py-3 font-bold text-white shadow-[0_18px_36px_rgba(228,92,67,0.22)] transition hover:opacity-95"
-                  >
+                    className="rounded-2xl bg-[#E45C43] px-5 py-3 font-bold text-white shadow-[0_18px_36px_rgba(228,92,67,0.22)] transition hover:opacity-95"
+                 >
                     Save Plan
-                  </button>
+                 </button>
+
+                 {planSaved && (
+                   <button
+                     onClick={() => router.push("/saved-plans")}
+                     className="rounded-2xl border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
+                   >
+                     View Saved Plans
+                   </button>
+                 )}
+               </div>
                 </div>
 
                 <div className="relative overflow-hidden rounded-[28px] bg-[#16203A] shadow-[0_18px_50px_rgba(22,32,58,0.22)]">
@@ -675,6 +700,37 @@ export default function MealPlanPage() {
           </div>
         </section>
       </div>
+      {showSuccess && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="w-[90%] max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      
+      <h2 className="text-xl font-bold text-[#16203A] mb-2">
+        Plan saved successfully!
+      </h2>
+
+      <p className="text-sm text-gray-600 mb-6">
+        Your meal plan has been saved. You can view it anytime in your saved plans.
+      </p>
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowSuccess(false)}
+          className="rounded-full border border-[#E8E1D8] px-4 py-2 text-sm font-bold text-[#16203A] hover:bg-[#FAF8F5]"
+        >
+          Close
+        </button>
+
+        <button
+          onClick={() => router.push("/saved-plans")}
+          className="rounded-full bg-[#E45C43] px-5 py-2 text-sm font-bold text-white hover:opacity-90"
+        >
+          View Plans
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </main>
   );
 }
@@ -878,6 +934,8 @@ function MealCard({
     </div>
   );
 }
+
+
 
 function getMealImage(meal: Meal, index: number) {
   const name = String(meal.name ?? "").toLowerCase();
