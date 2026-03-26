@@ -17,6 +17,7 @@ _MEALS_DF: Optional[pd.DataFrame] = None
 _PREF_MODEL = None
 _PREF_LABEL_ENCODER = None
 _FEEDBACK_MODEL = None
+_FEEDBACK_MODEL_COLUMNS = None
 _META: Dict[str, Any] = {
     "loaded": False,
     "rows_loaded": {"ingredients": 0, "meals": 0},
@@ -236,7 +237,7 @@ def _detect_main_protein(items: List[Dict[str, Any]], ing_df: pd.DataFrame) -> s
 
 
 def init_datasets(data_dir: str) -> None:
-    global _ING_DF, _MEALS_DF, _META, _PREF_MODEL, _PREF_LABEL_ENCODER, _FEEDBACK_MODEL
+    global _ING_DF, _MEALS_DF, _META, _PREF_MODEL, _PREF_LABEL_ENCODER, _FEEDBACK_MODEL, _FEEDBACK_MODEL_COLUMNS
 
     try:
         ing = pd.read_csv(f"{data_dir}/ingredients_db.csv", sep="\t")
@@ -265,13 +266,17 @@ def init_datasets(data_dir: str) -> None:
         meals["main_protein"] = items_list.apply(lambda items: _detect_main_protein(items, ing))
 
         model_dir = os.path.dirname(__file__)
-        model_path = os.path.join(model_dir, "meal_preference_model.pkl")
-        encoder_path = os.path.join(model_dir, "preference_label_encoder.pkl")
-        feedback_model_path = os.path.join(model_dir, "ML", "meal_model.pkl")
+        ml_dir = os.path.join(model_dir, "ML")
+
+        model_path = os.path.join(ml_dir, "meal_preference_model.pkl")
+        encoder_path = os.path.join(ml_dir, "preference_label_encoder.pkl")
+        feedback_model_path = os.path.join(ml_dir, "meal_model.pkl")
+        feedback_columns_path = os.path.join(ml_dir, "meal_model_columns.pkl")
 
         _PREF_MODEL = joblib.load(model_path) if os.path.exists(model_path) else None
         _PREF_LABEL_ENCODER = joblib.load(encoder_path) if os.path.exists(encoder_path) else None
         _FEEDBACK_MODEL = joblib.load(feedback_model_path) if os.path.exists(feedback_model_path) else None
+        _FEEDBACK_MODEL_COLUMNS = joblib.load(feedback_columns_path) if os.path.exists(feedback_columns_path) else None
 
 
         _ING_DF = ing
@@ -407,11 +412,15 @@ def _score_row(
     )
 
     if macro_preference == "high_protein":
-        score += protein * 1.8
+        score += protein * 2.5
+        score -= carbs * 0.8
+        score -= fat * 0.3
     elif macro_preference == "high_carb":
-        score += carbs * 0.8
+        score += carbs * 1.2
+        score += protein * 0.4
     elif macro_preference == "lower_carb":
-        score -= carbs * 2.5
+        score -= carbs * 2.8
+        score += protein * 1.0
 
     if prep_time_preference == "quick":
         score -= prep_time * 0.8
@@ -469,8 +478,44 @@ def _predict_meal_preference(
         "preference_score": round(pref_score, 4),
     }
 
-def _predict_feedback_preference(row: pd.Series) -> float:
-    if _FEEDBACK_MODEL is None:
+def _predict_feedback_preference(
+    row: pd.Series,
+    goal: GoalType,
+    prep_time_preference: PrepTimePreference,
+) -> float:
+    if _FEEDBACK_MODEL is None or _FEEDBACK_MODEL_COLUMNS is None:
+        return 0.0
+
+    try:
+        feedback_row = {
+            "calories": float(row.get("calories", 0.0)),
+            "protein": float(row.get("protein_g", 0.0)),
+            "carbs": float(row.get("carbs_g", 0.0)),
+            "fat": float(row.get("fat_g", 0.0)),
+            "meal_type": str(row.get("meal_type", "unknown")).strip().lower(),
+            "goal": str(goal).strip().lower(),
+            "prep_time": str(prep_time_preference).strip().lower(),
+            "main_protein": str(row.get("main_protein", "unknown")).strip().lower(),
+        }
+
+        X_input = pd.DataFrame([feedback_row])
+
+        categorical_cols = ["meal_type", "goal", "prep_time", "main_protein"]
+        X_input = pd.get_dummies(X_input, columns=categorical_cols)
+
+        for col in _FEEDBACK_MODEL_COLUMNS:
+            if col not in X_input.columns:
+                X_input[col] = 0
+
+        X_input = X_input[_FEEDBACK_MODEL_COLUMNS]
+
+        if hasattr(_FEEDBACK_MODEL, "predict_proba"):
+            return float(_FEEDBACK_MODEL.predict_proba(X_input)[0][1])
+
+        pred = _FEEDBACK_MODEL.predict(X_input)[0]
+        return float(pred)
+
+    except Exception:
         return 0.0
 
     try:
@@ -502,6 +547,39 @@ def _macro_caps(slot: str, macro_preference: MacroPreference, strict: bool) -> O
         False: {"breakfast": 40.0, "lunch": 45.0, "dinner": 45.0, "snack": 25.0},
     }
     return caps[bool(strict)].get(mt, caps[bool(strict)]["snack"])
+
+
+def _macro_hard_filter(
+    pool: pd.DataFrame,
+    macro_preference: MacroPreference,
+    slot: str,
+) -> pd.DataFrame:
+    if pool.empty:
+        return pool
+
+    mt = _slot_meal_type(slot)
+
+    if macro_preference == "high_protein":
+        if mt == "snack":
+            filtered = pool[
+                (pool["protein_g"] >= 12) &
+                (pool["protein_g"] >= pool["carbs_g"] * 0.8)
+            ].copy()
+        else:
+            filtered = pool[
+                (pool["protein_g"] >= 25) &
+                (pool["protein_g"] >= pool["carbs_g"] * 0.9)
+            ].copy()
+        return filtered
+
+    if macro_preference == "high_carb":
+        if mt == "snack":
+            filtered = pool[pool["carbs_g"] >= 18].copy()
+        else:
+            filtered = pool[pool["carbs_g"] >= 35].copy()
+        return filtered
+
+    return pool
 
 
 def _build_candidate_pool(
@@ -587,6 +665,10 @@ def _pick_meal(
         if pool.empty:
             return None
 
+    strict_macro_pool = _macro_hard_filter(pool, macro_preference, slot)
+    if not strict_macro_pool.empty:
+        pool = strict_macro_pool
+
     favorites_norm = _normalize_favorites(favorite_proteins)
     if favorites_norm:
         preferred_pool = pool[
@@ -618,8 +700,12 @@ def _pick_meal(
     pool["predicted_preference"] = ml_preds.apply(lambda x: x["predicted_preference"])
     pool["preference_score"] = ml_preds.apply(lambda x: x["preference_score"])
     pool["feedback_score"] = pool.apply(
-    lambda r: _predict_feedback_preference(r),
-    axis=1,
+        lambda r: _predict_feedback_preference(
+            r,
+            goal=goal,
+            prep_time_preference=prep_time_preference,
+        ),
+        axis=1,
     )
     pool["favorite_protein_match"] = pool["main_protein"].apply(
         lambda x: _favorite_protein_match(x, favorite_proteins)
@@ -644,20 +730,20 @@ def _pick_meal(
     else:
         pool["prep_time_distance"] = 0.0
 
-    if macro_preference == "lower_carb" and strict_macro:
-        ml_weight = 25.0
-    elif macro_preference == "lower_carb":
-        ml_weight = 45.0
+    if macro_preference in {"high_protein", "lower_carb", "high_carb"} and strict_macro:
+        ml_weight = 12.0
+    elif macro_preference in {"high_protein", "lower_carb", "high_carb"}:
+        ml_weight = 18.0
     else:
-        ml_weight = 100.0
+        ml_weight = 25.0
 
     pool["score"] = (
         pool["base_score"]
         + pool["preference_score"] * ml_weight
-        + pool["feedback_score"] * 40.0
-        + pool["favorite_protein_match"] * 60.0
-        + pool["likes_match"] * 35.0
-        + pool["favorite_meal_type_match"] * 15.0
+        + pool["feedback_score"] * 18.0
+        + pool["favorite_protein_match"] * 45.0
+        + pool["likes_match"] * 30.0
+        + pool["favorite_meal_type_match"] * 12.0
         - pool["prep_time_distance"] * 0.8
     )
 
@@ -666,7 +752,7 @@ def _pick_meal(
     if top_pool.empty:
         return None
 
-    return top_pool.sample(1).iloc[0].to_dict()
+    return top_pool.iloc[0].to_dict()
 
 
 def _build_meal_payload(rec: Dict[str, Any], slot: str, target: float) -> Dict[str, Any]:
@@ -988,3 +1074,4 @@ def replace_meal(
         payload["selection_note"] = selection_note
 
     return payload
+

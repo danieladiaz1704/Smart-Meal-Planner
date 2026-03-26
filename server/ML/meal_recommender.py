@@ -112,8 +112,9 @@ def diet_compatible(user_diet: DietType, meal_diet: str) -> int:
 
 
 def favorite_protein_match(main_protein: str, favorite_proteins: Optional[List[str]]) -> int:
-    favorites = {str(x).strip().lower() for x in (favorite_proteins or []) if str(x).strip()}
-    return 1 if str(main_protein).strip().lower() in favorites else 0
+    mp = str(main_protein).strip().lower()
+    favorites = [str(x).strip().lower() for x in (favorite_proteins or []) if str(x).strip()]
+    return 1 if any(fav in mp or mp in fav for fav in favorites) else 0
 
 
 def prep_match(prep_pref: PrepTimePreference, prep_time_min: int) -> int:
@@ -166,10 +167,17 @@ def protein_quality_for_goal(goal: GoalType, protein: float) -> int:
 def generate_label(meal_row: pd.Series, user: Dict[str, Any]) -> str:
     target_per_meal = get_target_calories_per_meal(user["goal"], user["meals_per_day"])
 
-    cal_diff = abs(float(meal_row["calories"]) - target_per_meal)
+    calories = float(meal_row["calories"])
+    protein = float(meal_row["protein"])
+    carbs = float(meal_row["carbs"])
+    fat = float(meal_row["fat"])
+    sugar = float(meal_row["sugar"])
+    prep_time = int(meal_row["prep_time_min"])
+
+    cal_diff = abs(calories - target_per_meal)
     diet_score = diet_compatible(user["diet_type"], str(meal_row["diet_type"]))
-    prep_score = prep_match(user["prep_time_preference"], int(meal_row["prep_time_min"]))
-    protein_score = protein_quality_for_goal(user["goal"], float(meal_row["protein"]))
+    prep_score = prep_match(user["prep_time_preference"], prep_time)
+    protein_score = protein_quality_for_goal(user["goal"], protein)
     fav_score = favorite_protein_match(meal_row["main_protein"], user["favorite_proteins"])
 
     if diet_score == 0:
@@ -177,31 +185,44 @@ def generate_label(meal_row: pd.Series, user: Dict[str, Any]) -> str:
 
     score = 0
 
-    # Calories
-    if cal_diff <= 80:
+    if cal_diff <= 70:
         score += 2
-    elif cal_diff <= 180:
+    elif cal_diff <= 150:
         score += 1
 
-    # Protein quality
     score += protein_score
-
-    # Prep preference
     score += prep_score
-
-    # Favorite protein weighted more heavily
     score += fav_score * 2
 
-    # Small health penalties
-    if float(meal_row["sugar"]) > 20:
-        score -= 1
-    if user["goal"] == "lose_weight" and float(meal_row["fat"]) > 30:
+    if user["goal"] == "gain_muscle":
+        if protein >= 30:
+            score += 2
+        elif protein >= 22:
+            score += 1
+
+        if carbs <= protein * 1.4:
+            score += 1
+        elif carbs > protein * 2.2:
+            score -= 1
+
+    elif user["goal"] == "lose_weight":
+        if protein >= 25:
+            score += 1
+        if fat > 30:
+            score -= 1
+        if sugar > 18:
+            score -= 1
+
+    else:
+        if protein >= 18:
+            score += 1
+
+    if prep_time > 30 and user["prep_time_preference"] != "any":
         score -= 1
 
-    # Slightly more permissive thresholds
-    if score >= 4:
+    if score >= 6:
         return "High"
-    elif score >= 2:
+    if score >= 3:
         return "Medium"
     return "Low"
 
