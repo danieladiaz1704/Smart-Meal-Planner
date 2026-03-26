@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function SignupPage() {
   const router = useRouter();
 
-  const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
+  const API_BASE = "http://127.0.0.1:8000";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -9,7 +9,7 @@ const manrope = Manrope({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const API_BASE = "https://smart-meal-planner-1-2c4l.onrender.com";
+const API_BASE = "http://127.0.0.1:8000";
 const REQUEST_TIMEOUT_MS = 15000;
 
 const PROTEIN_OPTIONS = [

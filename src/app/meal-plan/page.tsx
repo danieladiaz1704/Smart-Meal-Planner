@@ -9,7 +9,7 @@ const manrope = Manrope({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const API_BASE = "https://smart-meal-planner-backend-entq.onrender.com";
+const API_BASE = "http://127.0.0.1:8000";
 
 const DAY_IMAGES = [
   "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1400&q=80",
