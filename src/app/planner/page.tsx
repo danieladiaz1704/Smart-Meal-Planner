@@ -10,7 +10,7 @@ const manrope = Manrope({
 });
 
 const API_BASE = "http://127.0.0.1:8000";
-const REQUEST_TIMEOUT_MS = 15000;
+const REQUEST_TIMEOUT_MS = 60000;
 
 const PROTEIN_OPTIONS = [
   "Chicken breast",
@@ -134,6 +134,8 @@ export default function PlannerPage() {
     abortRef.current = controller;
 
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    
 
     try {
       const payload = buildPayload();
