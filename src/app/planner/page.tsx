@@ -174,28 +174,28 @@ export default function PlannerPage() {
   };
 
   return (
-    <main className={`${manrope.className} min-h-screen bg-[#F7F6F3] text-[#171B34]`}>
+    <main className={`${manrope.className} min-h-screen bg-[#FFF8F4] text-[#171B34]`}>
       <div className="mx-auto max-w-6xl px-5 py-8 md:py-10">
         <div className="mb-8 flex items-center justify-between gap-4">
           <button
             onClick={() => router.push("/")}
-            className="rounded-full border border-[#D9D7F4] bg-white px-5 py-3 text-sm font-extrabold text-[#171B34] shadow-[0_8px_24px_rgba(23,27,52,0.05)] transition hover:bg-[#F4F3FF]"
+            className="rounded-full border border-[#FED7AA] bg-white px-5 py-3 text-sm font-extrabold text-[#171B34] shadow-[0_8px_24px_rgba(23,27,52,0.05)] transition hover:bg-[#FFF7ED]"
           >
             ← Back
           </button>
 
-          <div className="hidden items-center gap-3 rounded-full border border-[#DDD8F9] bg-white px-5 py-2.5 shadow-[0_8px_24px_rgba(23,27,52,0.05)] sm:flex">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#6E63F6]" />
+          <div className="hidden items-center gap-3 rounded-full border border-[#FED7AA] bg-white px-5 py-2.5 shadow-[0_8px_24px_rgba(23,27,52,0.05)] sm:flex">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#F97316]" />
             <p className="text-sm font-extrabold tracking-[-0.01em] text-[#3D4466]">
               Smart Meal Planner
             </p>
           </div>
         </div>
 
-        <section className="overflow-hidden rounded-[36px] border border-[#E3E0F7] bg-white shadow-[0_24px_80px_rgba(23,27,52,0.08)]">
-          <div className="border-b border-[#ECE9FA] bg-[linear-gradient(180deg,#F5F2FF_0%,#FFFFFF_100%)] px-6 py-8 md:px-8 md:py-9">
+        <section className="overflow-hidden rounded-[36px] border border-[#FDE7D8] bg-white shadow-[0_24px_80px_rgba(23,27,52,0.08)]">
+          <div className="border-b border-[#FDE7D8] bg-[linear-gradient(180deg,#FFF3EC_0%,#FFFFFF_100%)] px-6 py-8 md:px-8 md:py-9">
             <div className="max-w-3xl">
-              <p className="mb-4 inline-flex rounded-full border border-[#D9D7F4] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6] shadow-sm">
+              <p className="mb-4 inline-flex rounded-full border border-[#FED7AA] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#F97316] shadow-sm">
                 Personalized planner
               </p>
 
@@ -352,9 +352,9 @@ export default function PlannerPage() {
             />
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-1">
-              <div className="rounded-[30px] border border-[#E5E2F8] bg-[#FBFAFF] p-5 shadow-[0_12px_30px_rgba(23,27,52,0.04)]">
+              <div className="rounded-[30px] border border-[#FDE7D8] bg-[#FFF8F4] p-5 shadow-[0_12px_30px_rgba(23,27,52,0.04)]">
                 <div className="mb-4">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6]">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#F97316]">
                     Planner modes
                   </p>
                   <h3 className="mt-2 text-xl font-extrabold tracking-[-0.03em] text-[#171B34]">
@@ -363,7 +363,7 @@ export default function PlannerPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="flex items-center gap-3 rounded-2xl border border-[#E6E5EF] bg-white px-4 py-4 text-sm font-bold text-[#171B34] shadow-sm">
+                  <label className="flex items-center gap-3 rounded-2xl border border-[#F3E8E2] bg-white px-4 py-4 text-sm font-bold text-[#171B34] shadow-sm">
                     <input
                       type="checkbox"
                       checked={form.exclude_ultra_processed}
@@ -373,19 +373,19 @@ export default function PlannerPage() {
                           exclude_ultra_processed: e.target.checked,
                         })
                       }
-                      className="h-4 w-4 accent-[#6E63F6]"
+                      className="h-4 w-4 accent-[#F97316]"
                     />
                     Exclude ultra-processed
                   </label>
 
-                  <label className="flex items-center gap-3 rounded-2xl border border-[#E6E5EF] bg-white px-4 py-4 text-sm font-bold text-[#171B34] shadow-sm">
+                  <label className="flex items-center gap-3 rounded-2xl border border-[#F3E8E2] bg-white px-4 py-4 text-sm font-bold text-[#171B34] shadow-sm">
                     <input
                       type="checkbox"
                       checked={form.variety}
                       onChange={(e) =>
                         setForm({ ...form, variety: e.target.checked })
                       }
-                      className="h-4 w-4 accent-[#6E63F6]"
+                      className="h-4 w-4 accent-[#F97316]"
                     />
                     Variety mode
                   </label>
@@ -393,10 +393,10 @@ export default function PlannerPage() {
               </div>
             </div>
 
-            <div className="rounded-[30px] border border-[#E5E2F8] bg-[#FBFAFF] p-5 shadow-[0_12px_30px_rgba(23,27,52,0.04)]">
+            <div className="rounded-[30px] border border-[#FDE7D8] bg-[#FFF8F4] p-5 shadow-[0_12px_30px_rgba(23,27,52,0.04)]">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6]">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#F97316]">
                     Protein picker
                   </p>
                   <h3 className="mt-2 text-xl font-extrabold tracking-[-0.03em] text-[#171B34]">
@@ -409,7 +409,7 @@ export default function PlannerPage() {
                 </div>
               </div>
 
-              <div className="max-h-72 overflow-y-auto rounded-[24px] border border-[#E6E5EF] bg-white p-3 shadow-inner">
+              <div className="max-h-72 overflow-y-auto rounded-[24px] border border-[#F3E8E2] bg-white p-3 shadow-inner">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {PROTEIN_OPTIONS.map((protein) => {
                     const checked = form.favorite_proteins.includes(protein);
@@ -419,15 +419,15 @@ export default function PlannerPage() {
                         key={protein}
                         className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm font-bold transition ${
                           checked
-                            ? "border-[#6E63F6] bg-[#F2F0FF] text-[#171B34] shadow-sm"
-                            : "border-[#E6E5EF] bg-white text-[#3D4466] hover:bg-[#F8F7FF]"
+                            ? "border-[#F97316] bg-[#FFF1F2] text-[#171B34] shadow-sm"
+                            : "border-[#F3E8E2] bg-white text-[#3D4466] hover:bg-[#FFF7ED]"
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleFavoriteProtein(protein)}
-                          className="h-4 w-4 accent-[#6E63F6]"
+                          className="h-4 w-4 accent-[#F97316]"
                         />
                         <span>{protein}</span>
                       </label>
@@ -438,15 +438,15 @@ export default function PlannerPage() {
             </div>
 
             {loading && (
-              <div className="rounded-[30px] border border-[#DDD8F9] bg-[#F6F4FF] p-5 shadow-[0_12px_30px_rgba(110,99,246,0.08)]">
+              <div className="rounded-[30px] border border-[#FED7AA] bg-[#FFF7ED] p-5 shadow-[0_12px_30px_rgba(249,115,22,0.10)]">
                 <div className="mb-3 flex items-center justify-between text-sm font-extrabold text-[#4A4F78]">
                   <span>Generating with AI…</span>
                   <span>{progress}%</span>
                 </div>
 
-                <div className="h-4 w-full overflow-hidden rounded-full bg-white ring-1 ring-[#E2DFF8]">
+                <div className="h-4 w-full overflow-hidden rounded-full bg-white ring-1 ring-[#FAD7C3]">
                   <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#6E63F6_0%,#8D84FF_100%)] transition-all duration-300"
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#F97316_0%,#FB7185_100%)] transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -456,7 +456,7 @@ export default function PlannerPage() {
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="w-full rounded-[24px] bg-[linear-gradient(90deg,#6E63F6_0%,#847BFF_100%)] px-6 py-4 text-lg font-extrabold text-white shadow-[0_18px_36px_rgba(110,99,246,0.24)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-[24px] bg-[linear-gradient(90deg,#F97316_0%,#FB7185_100%)] px-6 py-4 text-lg font-extrabold text-white shadow-[0_18px_36px_rgba(249,115,22,0.24)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Generating..." : "Generate Plan"}
             </button>
@@ -474,7 +474,7 @@ export default function PlannerPage() {
 }
 
 const inputClass =
-  "w-full rounded-[20px] border border-[#D9D7F4] bg-white px-4 py-3.5 text-[15px] font-semibold text-[#171B34] shadow-[0_4px_18px_rgba(23,27,52,0.04)] outline-none transition placeholder:text-[#8A90A8] focus:border-[#6E63F6] focus:ring-4 focus:ring-[#6E63F6]/12";
+  "w-full rounded-[20px] border border-[#FED7AA] bg-white px-4 py-3.5 text-[15px] font-semibold text-[#171B34] shadow-[0_4px_18px_rgba(23,27,52,0.04)] outline-none transition placeholder:text-[#8A90A8] focus:border-[#F97316] focus:ring-4 focus:ring-[#F97316]/12";
 
 function SectionHeader({
   eyebrow,
@@ -486,8 +486,8 @@ function SectionHeader({
   desc: string;
 }) {
   return (
-    <div className="rounded-[28px] border border-[#E5E2F8] bg-[#FBFAFF] px-5 py-5 shadow-[0_10px_26px_rgba(23,27,52,0.04)]">
-      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6E63F6]">
+    <div className="rounded-[28px] border border-[#FDE7D8] bg-[#FFF8F4] px-5 py-5 shadow-[0_10px_26px_rgba(23,27,52,0.04)]">
+      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#F97316]">
         {eyebrow}
       </p>
       <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[#171B34]">

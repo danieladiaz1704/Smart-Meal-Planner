@@ -33,12 +33,10 @@ export default function Landing() {
 
   return (
     <main
-      className={`${dmSans.className} min-h-screen bg-[#F7F6F3] text-[#171B34] overflow-x-hidden`}
+      className={`${dmSans.className} min-h-screen overflow-x-hidden bg-[#FFF8F4] text-[#171B34]`}
     >
-      
-
       {/* navbar */}
-      <header className="sticky top-0 z-30 border-b border-black/5 bg-[#F7F6F3]/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-black/5 bg-[#FFF8F4]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5">
           <div className="flex items-center gap-3">
             <div>
@@ -107,7 +105,7 @@ export default function Landing() {
 
                 <button
                   onClick={() => router.push("/planner")}
-                  className="rounded-full bg-[#6E63F6] px-6 py-3 font-extrabold text-white shadow-[0_12px_30px_rgba(110,99,246,0.22)] transition hover:opacity-92"
+                  className="rounded-full bg-gradient-to-r from-[#F97316] to-[#FB7185] px-6 py-3 font-extrabold text-white shadow-[0_12px_30px_rgba(249,115,22,0.28)] transition hover:opacity-92"
                 >
                   Create plan →
                 </button>
@@ -145,7 +143,7 @@ export default function Landing() {
                 </button>
                 <button
                   onClick={() => router.push("/planner")}
-                  className="rounded-full bg-[#6E63F6] px-4 py-2 text-sm font-extrabold text-white"
+                  className="rounded-full bg-gradient-to-r from-[#F97316] to-[#FB7185] px-4 py-2 text-sm font-extrabold text-white"
                 >
                   Plan →
                 </button>
@@ -160,28 +158,29 @@ export default function Landing() {
         <section className="grid gap-14 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
           {/* left */}
           <div className="max-w-2xl">
-            <div className="inline-flex items-center rounded-full border border-[#DDD8F9] bg-white px-4 py-2 text-sm font-semibold text-[#6E63F6] shadow-sm">
-              AI-powered nutrition planning
+            <div className="inline-flex items-center rounded-full border border-[#FED7AA] bg-white px-4 py-2 text-sm font-extrabold uppercase tracking-[0.14em] text-[#F97316] shadow-[0_8px_20px_rgba(249,115,22,0.08)]">
+            AI-Powered Nutrition Planning
             </div>
 
-            <h1 className="mt-8 text-5xl font-extrabold leading-[0.96] tracking-[-0.04em] text-[#171B34] sm:text-6xl lg:text-7xl">
-              Eat Fresh.
+            <h1 className="mt-8 text-5xl font-extrabold leading-[0.92] tracking-[-0.05em] text-[#171B34] sm:text-6xl lg:text-7xl">
+              Eat Smart.
               <span
-                className={`mt-1 block font-medium italic text-[#5B5F86] ${cormorant.className}`}
+                className={`mt-1 block bg-gradient-to-r from-[#F97316] via-[#FB7185] to-[#F43F5E] bg-clip-text font-semibold text-transparent ${cormorant.className}`}
               >
                 Live Better.
               </span>
             </h1>
 
-            <p className="mt-8 max-w-xl text-xl leading-9 text-[#667085] sm:text-2xl sm:leading-10">
-              Create your personalized weekly menu around your goals, taste,
-              schedule, and lifestyle.
+            <p className="mt-8 max-w-2xl text-xl leading-9 text-[#667085] sm:text-2xl sm:leading-10">
+              Build a personalized meal plan around your calories, diet, allergies,
+              and preferences. Get balanced meals and a plan
+              you can actually follow.
             </p>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
                 onClick={() => router.push("/planner")}
-                className="rounded-2xl bg-[#6E63F6] px-8 py-4 text-lg font-extrabold text-white shadow-[0_12px_32px_rgba(110,99,246,0.22)] transition hover:opacity-92"
+                className="rounded-2xl bg-gradient-to-r from-[#F97316] to-[#FB7185] px-8 py-4 text-lg font-extrabold text-white shadow-[0_12px_32px_rgba(249,115,22,0.28)] transition hover:opacity-92"
               >
                 Create Your Plan →
               </button>
@@ -223,14 +222,14 @@ export default function Landing() {
 
           {/* right */}
           <div className="relative flex items-center justify-center">
-            <div className="absolute right-0 top-0 hidden h-[540px] w-[540px] rounded-[42px] bg-[#ECE9FF] lg:block" />
+            <div className="absolute right-0 top-0 hidden h-[540px] w-[540px] rounded-[42px] bg-gradient-to-br from-[#FFF7ED] to-[#FFE4E6] lg:block" />
 
-            <div className="relative z-10 h-[420px] w-full max-w-[520px] overflow-hidden rounded-[40px] bg-white shadow-[0_28px_80px_rgba(23,27,52,0.10)] ring-1 ring-black/5 sm:h-[500px] lg:h-[620px]">
+            <div className="relative z-10 h-[420px] w-full max-w-[520px] overflow-hidden rounded-[42px] bg-white shadow-[0_30px_90px_rgba(23,27,52,0.14)] ring-1 ring-black/5 sm:h-[500px] lg:h-[620px]">
               <img
-                src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400&q=80"
-                alt="Healthy premium meal"
-                className="h-full w-full object-cover"
-              />
+              src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80"
+              alt="Fresh healthy bowl"
+              className="h-full w-full object-cover"
+            />
             </div>
 
             <HeroCard
@@ -298,7 +297,7 @@ export default function Landing() {
           <div className="mt-10 flex justify-center">
             <button
               onClick={() => router.push("/planner")}
-              className="rounded-full bg-[#6E63F6] px-8 py-4 text-lg font-extrabold text-white shadow-[0_12px_32px_rgba(110,99,246,0.22)] transition hover:opacity-92"
+              className="rounded-full bg-gradient-to-r from-[#F97316] to-[#FB7185] px-8 py-4 text-lg font-extrabold text-white shadow-[0_12px_32px_rgba(249,115,22,0.28)] transition hover:opacity-92"
             >
               Start →
             </button>
@@ -375,7 +374,7 @@ export default function Landing() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   onClick={() => router.push("/planner")}
-                  className="rounded-full bg-[#6E63F6] px-8 py-4 text-lg font-extrabold text-white transition hover:opacity-92"
+                  className="rounded-full bg-gradient-to-r from-[#F97316] to-[#FB7185] px-8 py-4 text-lg font-extrabold text-white transition hover:opacity-92"
                 >
                   Create Your Plan
                 </button>
@@ -412,7 +411,7 @@ export default function Landing() {
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full border border-[#DDD8F9] bg-white px-3 py-1 text-xs font-semibold text-[#5B5F86] shadow-sm">
+    <span className="rounded-full border border-[#FED7AA] bg-[#FFF7ED] px-3 py-1 text-xs font-semibold text-[#F97316] shadow-sm">
       {children}
     </span>
   );
@@ -420,7 +419,7 @@ function Tag({ children }: { children: React.ReactNode }) {
 
 function Avatar({ img }: { img: string }) {
   return (
-    <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-[#F7F6F3] shadow-sm">
+    <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-[#FFF8F4] shadow-sm">
       <img src={img} alt="User avatar" className="h-full w-full object-cover" />
     </div>
   );
@@ -442,7 +441,7 @@ function HeroCard({
       className={`absolute z-20 rounded-[28px] bg-white px-5 py-4 shadow-[0_20px_40px_rgba(0,0,0,0.08)] ${className}`}
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F0FF] text-xl">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FFF1F2] text-xl">
           {emoji}
         </div>
         <div>
@@ -482,7 +481,7 @@ function StepCard({
 }) {
   return (
     <div className="rounded-[32px] border border-black/6 bg-white p-8 shadow-[0_10px_30px_rgba(23,27,52,0.04)]">
-      <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-[#5B5F86] text-4xl font-extrabold text-white shadow-lg">
+      <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-gradient-to-br from-[#F97316] to-[#FB7185] text-4xl font-extrabold text-white shadow-lg">
         {number}
       </div>
       <h3 className="mt-8 text-3xl font-extrabold tracking-[-0.03em] text-[#171B34]">
@@ -502,7 +501,7 @@ function Benefit({
 }) {
   return (
     <div className="flex gap-5">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#EEF0FF] text-2xl text-[#6E63F6]">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#FFF7ED] text-2xl text-[#F97316]">
         ✓
       </div>
       <div>

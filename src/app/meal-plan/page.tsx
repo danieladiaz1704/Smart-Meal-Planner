@@ -11,6 +11,94 @@ const manrope = Manrope({
 
 const API_BASE = "https://smart-meal-planner-backend-entq.onrender.com";
 
+const DAY_IMAGES = [
+  "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1546069901-eacef0df6022?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400&q=80",
+  "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80",
+];
+const SHRIMP_IMAGES = [
+  "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&w=1200&q=80",
+  "https://www.skinnytaste.com/wp-content/uploads/2024/08/Arroz-Con-Camarones-10.jpg",
+];
+const EGGS_IMAGES = [
+  "https://www.eatingwell.com/thmb/ZHXRyJgN5ikb5Zk0SMw1XhQ8W9g=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/EWL-267169-avocado-egg-toast-Hero-02-037627ac211748fc857b5a69989fa8e9.jpg", // scrambled
+  "https://www.eatingwell.com/thmb/ZHXRyJgN5ikb5Zk0SMw1XhQ8W9g=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/EWL-267169-avocado-egg-toast-Hero-02-037627ac211748fc857b5a69989fa8e9.jpg", // avocado toast + egg
+  "https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1200&q=80", // omelette
+  "https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=1200&q=80", // breakfast plate
+];
+
+const TOFU_BREAKFAST_IMAGES = [
+  "https://bonviveur.com/es/recetas/tofu-con-verduras",
+  "https://comedera.com/wp-content/uploads/sites/9/2022/04/Mapo-tofu-shutterstock_1077262364.jpg",
+];
+
+const OATS_IMAGES = [
+  "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=1200&q=80",
+  "https://www.skinnytaste.com/wp-content/uploads/2022/03/Peanut-Butter-Breakfast-Oatmeal-Bowl-8.jpg",
+  "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1200&q=80",
+];
+
+const PANCAKES_IMAGES = [
+  "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=1200&q=80",
+];
+
+const YOGURT_IMAGES = [
+  "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=1200&q=80",
+];
+const SIDEBAR_IMAGE =
+  "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1400&q=80";
+
+const MEAL_IMAGE_MAP = {
+  oats:
+    "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=1200&q=80",
+  eggs:
+    "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1200&q=80",
+  yogurt:
+    "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1200&q=80",
+  pancakes:
+    "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?auto=format&fit=crop&w=1200&q=80",
+  salmon:
+    "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80",
+  shrimp:
+    "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&w=1200&q=80",
+    
+  tuna:
+    "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1200&q=80",
+  chickenRice:
+    "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1200&q=80",
+  chicken:
+    "https://www.threeolivesbranch.com/wp-content/uploads/2024/01/copycat-olive-garden-chicken-con-broccoli-threeolivesbranch-3-768x1024.jpg",
+  turkey:
+    "https://images.unsplash.com/photo-1604908176997-4319cb9b2d9b?auto=format&fit=crop&w=1200&q=80",
+  vegan:
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
+  legumes:
+    "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80",
+  quinoa:
+    "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
+  salad:
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
+  pasta:
+    "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1200&q=80",
+  wrap:
+    "https://images.unsplash.com/photo-1539252554453-80ab65ce3586?auto=format&fit=crop&w=1200&q=80",
+  dinner:
+    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80",
+  bowl:
+    "https://images.unsplash.com/photo-1546069901-eacef0df6022?auto=format&fit=crop&w=1200&q=80",
+  fallback1:
+    "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
+  fallback2:
+    "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80",
+  fallback3:
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
+};
+
 type Meal = {
   meal_type: string;
   slot: string;
@@ -148,84 +236,84 @@ export default function MealPlanPage() {
     sessionStorage.setItem("mealPlanResult", JSON.stringify(next));
   };
 
-
   const handleSavePlan = async () => {
-  try {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
-    if (!currentUser?.email || !result?.plan || !requestData) {
-      alert("No plan to save");
-      return;
-    }
-
-    const res = await fetch(`${API_BASE}/save-plan`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: currentUser.email,
-        plan: result.plan,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data?.status !== "ok") {
-      throw new Error(data?.detail || "Failed to save plan");
-    }
-
-    setPlanSaved(true);
-
-    setShowSuccess(true);
-
-    const feedbackRequests: Promise<Response>[] = [];
-
-    for (const day of result.plan.days || []) {
-      for (const meal of day.meals || []) {
-        feedbackRequests.push(
-          fetch(`${API_BASE}/feedback`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              user_email: currentUser.email,
-              meal_id: meal.recipe_id,
-              meal_name: meal.name,
-              meal_type: meal.meal_type,
-              diet_type: requestData.diet_type,
-              prep_time: meal.minutes,
-              calories: meal.calories,
-              protein: meal.protein_g,
-              carbs: meal.carbs_g,
-              fat: meal.fat_g,
-              main_protein: meal.main_protein || "other",
-              goal: requestData.goal,
-              prep_preference: requestData.prep_time_preference,
-              action: "saved",
-            }),
-          })
-        );
+      if (!currentUser?.email || !result?.plan || !requestData) {
+        alert("No plan to save");
+        return;
       }
+
+      const res = await fetch(`${API_BASE}/save-plan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          plan: result.plan,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data?.status !== "ok") {
+        throw new Error(data?.detail || "Failed to save plan");
+      }
+
+      setPlanSaved(true);
+      setShowSuccess(true);
+
+      const feedbackRequests: Promise<Response>[] = [];
+
+      for (const day of result.plan.days || []) {
+        for (const meal of day.meals || []) {
+          feedbackRequests.push(
+            fetch(`${API_BASE}/feedback`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                user_email: currentUser.email,
+                meal_id: meal.recipe_id,
+                meal_name: meal.name,
+                meal_type: meal.meal_type,
+                diet_type: requestData.diet_type,
+                prep_time: meal.minutes,
+                calories: meal.calories,
+                protein: meal.protein_g,
+                carbs: meal.carbs_g,
+                fat: meal.fat_g,
+                main_protein: meal.main_protein || "other",
+                goal: requestData.goal,
+                prep_preference: requestData.prep_time_preference,
+                action: "saved",
+              }),
+            })
+          );
+        }
+      }
+
+      Promise.allSettled(feedbackRequests).then((results) => {
+        console.log("Feedback results:", results);
+      });
+    } catch (err: any) {
+      console.error("Save plan error:", err);
+      setError(err?.message ?? "Failed to save plan");
     }
+  };
 
-    Promise.allSettled(feedbackRequests).then((results) => {
-      console.log("Feedback results:", results);
-    });
-
-  } catch (err: any) {
-    console.error("Save plan error:", err);
-    setError(err?.message ?? "Failed to save plan");
-  }
-};
-  
-
-  const handleReplace = async (slot: string, target: number, currentRecipeId: number) => {
+  const handleReplace = async (
+    slot: string,
+    target: number,
+    currentRecipeId: number
+  ) => {
     if (!result?.plan || !activeDayObj || !requestData) return;
 
     const oldMeal = (activeDayObj.meals ?? []).find(
-     (m) => (m.slot ?? m.meal_type) === slot && Number(m.recipe_id) === Number(currentRecipeId)
+      (m) => (m.slot ?? m.meal_type) === slot && Number(m.recipe_id) === Number(currentRecipeId)
     );
 
     setError(null);
@@ -273,7 +361,6 @@ export default function MealPlanPage() {
       }
 
       const newMeal: Meal = data.meal;
-
       const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
       if (currentUser?.email && oldMeal) {
@@ -433,9 +520,12 @@ export default function MealPlanPage() {
 
               <div className="overflow-hidden rounded-[28px] ring-1 ring-black/5">
                 <img
-                  src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80"
+                  src={MEAL_IMAGE_MAP.fallback3}
                   alt="Colorful healthy bowl"
                   className="h-[280px] w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = MEAL_IMAGE_MAP.fallback1;
+                  }}
                 />
               </div>
             </div>
@@ -450,29 +540,28 @@ export default function MealPlanPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[340px] bg-[radial-gradient(circle_at_top_left,_rgba(228,92,67,0.14),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(22,32,58,0.08),_transparent_30%)]" />
 
       <div className="relative mx-auto max-w-7xl px-5 py-8 md:py-10">
-        
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-         <div className="flex flex-wrap items-center gap-3">
-           <button
-            onClick={() => router.push("/planner")}
-            className="rounded-full border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => router.push("/planner")}
+              className="rounded-full border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
             >
               ← Edit questions
             </button>
 
             <button
-             onClick={() => router.push("/")}
-             className="rounded-full border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
+              onClick={() => router.push("/")}
+              className="rounded-full border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
             >
-             Home
+              Home
             </button>
-            </div>
-
-            <div className="hidden items-center gap-2 rounded-full border border-[#F2D1C9] bg-white px-4 py-2 shadow-sm sm:flex">
-           <span className="h-2.5 w-2.5 rounded-full bg-[#E45C43]" />
-             <p className="text-sm font-bold text-[#A54334]">Meal Plan Results</p>
-             </div>
           </div>
+
+          <div className="hidden items-center gap-2 rounded-full border border-[#F2D1C9] bg-white px-4 py-2 shadow-sm sm:flex">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#E45C43]" />
+            <p className="text-sm font-bold text-[#A54334]">Meal Plan Results</p>
+          </div>
+        </div>
 
         {error && (
           <div className="mb-4 rounded-2xl border border-[#F0C7CF] bg-[#FFF7FA] p-4 text-sm font-semibold text-[#A33A5B]">
@@ -481,7 +570,6 @@ export default function MealPlanPage() {
         )}
 
         <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          {/* LEFT MAIN */}
           <div className="space-y-6">
             <div className="overflow-hidden rounded-[34px] border border-[#E8E1D8] bg-white shadow-[0_26px_80px_rgba(22,32,58,0.08)]">
               <div className="grid gap-5 border-b border-[#F0EBE4] bg-[linear-gradient(180deg,#FFF8F4_0%,#FFFFFF_100%)] p-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
@@ -500,29 +588,32 @@ export default function MealPlanPage() {
                   </p>
 
                   <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    onClick={handleSavePlan}
-                    className="rounded-2xl bg-[#E45C43] px-5 py-3 font-bold text-white shadow-[0_18px_36px_rgba(228,92,67,0.22)] transition hover:opacity-95"
-                 >
-                    Save Plan
-                 </button>
+                    <button
+                      onClick={handleSavePlan}
+                      className="rounded-2xl bg-[#E45C43] px-5 py-3 font-bold text-white shadow-[0_18px_36px_rgba(228,92,67,0.22)] transition hover:opacity-95"
+                    >
+                      Save Plan
+                    </button>
 
-                 {planSaved && (
-                   <button
-                     onClick={() => router.push("/saved-plans")}
-                     className="rounded-2xl border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
-                   >
-                     View Saved Plans
-                   </button>
-                 )}
-               </div>
+                    {planSaved && (
+                      <button
+                        onClick={() => router.push("/saved-plans")}
+                        className="rounded-2xl border border-[#E8E1D8] bg-white px-5 py-3 font-bold text-[#16203A] shadow-sm transition hover:bg-[#FAF8F5]"
+                      >
+                        View Saved Plans
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="relative overflow-hidden rounded-[28px] bg-[#16203A] shadow-[0_18px_50px_rgba(22,32,58,0.22)]">
                   <img
                     src={getDayImage(activeDayObj?.day ?? 1)}
                     alt="Meal planning visual"
-                    className="h-[220px] w-full object-cover opacity-90"
+                    className="h-[220px] w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = MEAL_IMAGE_MAP.fallback1;
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#16203A]/70 via-[#16203A]/20 to-transparent" />
                   <div className="absolute left-5 top-5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
@@ -614,14 +705,16 @@ export default function MealPlanPage() {
             )}
           </div>
 
-          {/* RIGHT SIDEBAR */}
           <div className="space-y-6">
             <div className="overflow-hidden rounded-[32px] border border-[#E8E1D8] bg-white shadow-[0_22px_70px_rgba(22,32,58,0.08)]">
               <div className="relative h-[220px] overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80"
+                  src={SIDEBAR_IMAGE}
                   alt="Fresh ingredients and meal prep"
                   className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = MEAL_IMAGE_MAP.fallback2;
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#16203A]/72 via-[#16203A]/20 to-transparent" />
                 <div className="absolute left-5 bottom-5 right-5">
@@ -700,49 +793,42 @@ export default function MealPlanPage() {
           </div>
         </section>
       </div>
+
       {showSuccess && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-    <div className="w-[90%] max-w-md rounded-2xl bg-white p-6 shadow-xl">
-      
-      <h2 className="text-xl font-bold text-[#16203A] mb-2">
-        Plan saved successfully!
-      </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-[90%] max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="mb-2 text-xl font-bold text-[#16203A]">
+              Plan saved successfully!
+            </h2>
 
-      <p className="text-sm text-gray-600 mb-6">
-        Your meal plan has been saved. You can view it anytime in your saved plans.
-      </p>
+            <p className="mb-6 text-sm text-gray-600">
+              Your meal plan has been saved. You can view it anytime in your saved plans.
+            </p>
 
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => setShowSuccess(false)}
-          className="rounded-full border border-[#E8E1D8] px-4 py-2 text-sm font-bold text-[#16203A] hover:bg-[#FAF8F5]"
-        >
-          Close
-        </button>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="rounded-full border border-[#E8E1D8] px-4 py-2 text-sm font-bold text-[#16203A] hover:bg-[#FAF8F5]"
+              >
+                Close
+              </button>
 
-        <button
-          onClick={() => router.push("/saved-plans")}
-          className="rounded-full bg-[#E45C43] px-5 py-2 text-sm font-bold text-white hover:opacity-90"
-        >
-          View Plans
-        </button>
-      </div>
-
-    </div>
-  </div>
-)}
+              <button
+                onClick={() => router.push("/saved-plans")}
+                className="rounded-full bg-[#E45C43] px-5 py-2 text-sm font-bold text-white hover:opacity-90"
+              >
+                View Plans
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
 
 function getDayImage(day: number) {
-  const images = [
-    "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80",
-    "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=1400&q=80",
-  ];
-  return images[(Math.max(day, 1) - 1) % images.length];
+  return DAY_IMAGES[(Math.max(day, 1) - 1) % DAY_IMAGES.length];
 }
 
 function formatMeta(value?: string | number | null) {
@@ -828,6 +914,9 @@ function MealCard({
             src={getMealImage(meal, index)}
             alt={meal.name}
             className="h-[180px] w-full object-cover md:h-full"
+            onError={(e) => {
+              e.currentTarget.src = MEAL_IMAGE_MAP.fallback3;
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#16203A]/55 via-transparent to-transparent" />
           <div className="absolute left-4 top-4 rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white backdrop-blur">
@@ -935,8 +1024,6 @@ function MealCard({
   );
 }
 
-
-
 function getMealImage(meal: Meal, index: number) {
   const name = String(meal.name ?? "").toLowerCase();
   const protein = String(meal.main_protein ?? "").toLowerCase();
@@ -945,57 +1032,87 @@ function getMealImage(meal: Meal, index: number) {
 
   const text = `${name} ${protein} ${mealType} ${ingredients}`;
 
-  // Very specific breakfast matches
-  if (
-    text.includes("protein oats") ||
-    text.includes("oats") ||
-    text.includes("banana") && text.includes("whey") ||
-    text.includes("oatmeal") ||
-    text.includes("overnight oats")
-  ) {
-    return "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=1200&q=80";
-  }
+  
+  // 🌱 VEGAN primero
+if (text.includes("tofu scramble")) {
+  const tofuSeed =
+    Number(meal.recipe_id || 0) +
+    String(meal.name || "")
+      .split("")
+      .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
 
-  if (
-    text.includes("scramble") ||
-    text.includes("omelette") ||
-    text.includes("toast") ||
-    text.includes("egg breakfast") ||
-    text.includes("breakfast")
-  ) {
-    return "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1200&q=80";
-  }
+  return TOFU_BREAKFAST_IMAGES[tofuSeed % TOFU_BREAKFAST_IMAGES.length];
+}
 
-  if (text.includes("yogurt") || text.includes("skyr") || text.includes("granola")) {
-    return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1200&q=80";
-  }
+if (
+  text.includes("tofu") ||
+  text.includes("tempeh") ||
+  text.includes("vegan")
+) {
+  const tofuSeed =
+    Number(meal.recipe_id || 0) +
+    String(meal.name || "")
+      .split("")
+      .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+
+  return TOFU_BREAKFAST_IMAGES[tofuSeed % TOFU_BREAKFAST_IMAGES.length];
+}
+
+// 🥞 PANCAKES
+if (text.includes("pancake") || text.includes("waffle") || text.includes("french toast")) {
+  return PANCAKES_IMAGES[(index - 1) % PANCAKES_IMAGES.length];
+}
+
+// 🥣 OATS
+if (
+  text.includes("protein oats") ||
+  text.includes("oatmeal") ||
+  text.includes("overnight oats") ||
+  text.includes("oats")
+) {
+  return OATS_IMAGES[(index - 1) % OATS_IMAGES.length];
+}
+
+// 🍓 YOGURT
+if (text.includes("yogurt") || text.includes("skyr") || text.includes("granola")) {
+  return YOGURT_IMAGES[(index - 1) % YOGURT_IMAGES.length];
+}
+
+// 🥚 EGGS (SIN toast)
+if (
+  text.includes("egg") ||
+  text.includes("omelette") ||
+  text.includes("scramble")
+) {
+  return EGGS_IMAGES[(index - 1) % EGGS_IMAGES.length];
+}
 
   if (text.includes("salmon")) {
-    return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.salmon;
   }
 
   if (text.includes("shrimp") || text.includes("prawn")) {
-    return "https://images.unsplash.com/photo-1565299585323-38174c4a6471?auto=format&fit=crop&w=1200&q=80";
+  return SHRIMP_IMAGES[(index - 1) % SHRIMP_IMAGES.length];
   }
 
   if (text.includes("tuna")) {
-    return "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.tuna;
   }
 
   if (text.includes("chicken") && text.includes("rice")) {
-    return "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.chickenRice;
   }
 
   if (text.includes("chicken") && text.includes("broccoli")) {
-    return "https://images.unsplash.com/photo-1604908176997-4319cb9b2d9b?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.chicken;
   }
 
   if (text.includes("chicken")) {
-    return "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.chicken;
   }
 
   if (text.includes("turkey")) {
-    return "https://images.unsplash.com/photo-1604908176997-4319cb9b2d9b?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.turkey;
   }
 
   if (
@@ -1004,49 +1121,50 @@ function getMealImage(meal: Meal, index: number) {
     text.includes("black bean") ||
     text.includes("beans")
   ) {
-    return "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.legumes;
   }
 
-  if (
-    text.includes("tofu") ||
-    text.includes("tempeh") ||
-    text.includes("vegan") ||
-    text.includes("vegetarian bowl")
-  ) {
-    return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80";
+
+  if (text.includes("quinoa")) {
+    return MEAL_IMAGE_MAP.quinoa;
   }
 
-  if (text.includes("quinoa") || text.includes("rice bowl") || text.includes("bowl")) {
-    return "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80";
-  }
-
-  if (text.includes("salad") || text.includes("kale") || text.includes("greens")) {
-    return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80";
+  if (text.includes("salad") || text.includes("greens") || text.includes("kale")) {
+    return MEAL_IMAGE_MAP.salad;
   }
 
   if (text.includes("pasta") || text.includes("noodle") || text.includes("spaghetti")) {
-    return "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1200&q=80";
+    return MEAL_IMAGE_MAP.pasta;
   }
 
-  if (text.includes("wrap") || text.includes("sandwich")) {
-    return "https://images.unsplash.com/photo-1521390188846-e2a3a97453a0?auto=format&fit=crop&w=1200&q=80";
+  if (text.includes("wrap") || text.includes("sandwich") || text.includes("burger")) {
+    return MEAL_IMAGE_MAP.wrap;
   }
 
-  if (text.includes("plate") || text.includes("dinner") || text.includes("roasted")) {
-    return "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80";
+  if (
+    text.includes("bowl") ||
+    mealType.includes("lunch") ||
+    mealType.includes("dinner")
+  ) {
+    return MEAL_IMAGE_MAP.bowl;
+  }
+
+  if (mealType.includes("dinner") || text.includes("roasted") || text.includes("plate")) {
+    return MEAL_IMAGE_MAP.dinner;
   }
 
   const fallback = [
-    "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
+    MEAL_IMAGE_MAP.fallback1,
+    MEAL_IMAGE_MAP.fallback2,
+    MEAL_IMAGE_MAP.fallback3,
   ];
 
   return fallback[(index - 1) % fallback.length];
 }
+
 function Tag({ label }: { label: string }) {
   return (
-    <span className="rounded-full border border-[#E8E1D8] bg-[#FBFAF8] px-3 py-1 font-bold text-[#394564]">
+    <span className="rounded-full border border-[#E8E1D8] bg-[#FBFAF8] px-3 py-1 text-xs font-bold text-[#5E667A]">
       {label}
     </span>
   );
